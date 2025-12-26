@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Quantum Item Finder</title>
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
+      background: #f7f7f7;
     }
+
     input {
       padding: 10px;
       width: 80%;
+      max-width: 400px;
       margin-top: 10px;
     }
+
     button {
       margin-top: 15px;
       padding: 10px 20px;
@@ -22,11 +26,17 @@
       color: white;
       border: none;
       font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
     }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
     #result {
       margin-top: 20px;
       font-weight: bold;
-      color: black;
     }
   </style>
 </head>
@@ -36,16 +46,16 @@
   <h2>🔍 Quantum Item Finder</h2>
   <p>📍 Area: Tambaram</p>
 
-  <input id="itemInput" type="text" placeholder="Enter item name" />
-  <br><br>
+  <input
+    id="itemInput"
+    type="text"
+    placeholder="Enter item name (mobile, tv, ac...)"
+  />
 
+  <br>
   <button onclick="findItem()">Find Item</button>
-  <br><br>
-
-  <button onclick="testWhatsApp()">🧪 Test WhatsApp</button>
-  <br><br>
-
-  <button onclick="openMap()">📍 Go to Shop</button>
+  <br>
+  <button onclick="openMap()">📍 Go to Shop Area</button>
 
   <p id="result"></p>
 
@@ -61,54 +71,60 @@
     function findItem() {
       var item = document
         .getElementById("itemInput")
-        .value.toLowerCase();
+        .value
+        .toLowerCase()
+        .trim();
+
       var result = document.getElementById("result");
 
       if (item === "") {
-        result.innerText = "⚠️ Please enter an item";
+        result.innerText = "⚠️ Please enter an item name";
         return;
       }
 
       var shops = {
         mobile: "Sri Mobiles - Tambaram East",
         laptop: "Tech World - Velachery",
-        charger: "FastCharge Shop - Chromepet"
+        charger: "FastCharge Shop - Chromepet",
+        tv: "Sony TV Showroom - Tambaram",
+        fridge: "LG Store - Selaiyur",
+        ac: "Samsung AC Center - Medavakkam"
       };
 
       if (shops[item]) {
         result.innerHTML =
-          "✅ Item found at: <b>" +
+          "✅ Item found at:<br><br><b>" +
           shops[item] +
           "</b><br><br>" +
+          "<button onclick=\"openShopMap('" +
+          shops[item] +
+          "')\">📍 Go to Shop</button><br><br>" +
           "<button onclick=\"preBookItem('" +
           item +
-          "')\">📲 Pre-Book on WhatsApp</button>";
+          "')\">💬 Pre-Book on WhatsApp</button>";
       } else {
         result.innerText = "❌ Item not found nearby";
       }
     }
 
-    function testWhatsApp() {
-      var phone = "916379159240"; // change number if needed
-      var msg = "Hello, WhatsApp test from Quantum Item Finder";
+    function openShopMap(shopName) {
       var url =
-        "https://wa.me/" +
-        phone +
-        "?text=" +
-        encodeURIComponent(msg);
-      window.location.href = url;
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(shopName + " Tambaram Chennai");
+      window.open(url, "_blank");
     }
 
     function preBookItem(item) {
-      var phone = "916379159240"; // shop number
-      var msg = "Hi, I want to pre-book the item: " + item;
+      var phone = "916379159240"; // 🔴 un WhatsApp number (change pannalaam)
+      var message = "Hi, I want to pre-book the item: " + item;
       var url =
         "https://wa.me/" +
         phone +
         "?text=" +
-        encodeURIComponent(msg);
-      window.location.href = url;
+        encodeURIComponent(message);
+      window.open(url, "_blank");
     }
   </script>
 
 </body>
+</html>
