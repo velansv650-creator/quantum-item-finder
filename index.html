@@ -68,11 +68,28 @@
       };
 
       if (shops[item]) {
-        result.innerText = "✅ Item found at: " + shops[item];
-      } else {
-        result.innerText = "❌ Item not found nearby";
+  result.innerHTML =
+    "✅ Item found at:<br><b>" + shops[item] + "</b><br><br>" +
+    "<button onclick=\"openShopMap('" + shops[item] + "')\">📍 View Shop on Map</button><br><br>" +
+    "<button onclick=\"preBookItem('" + item + "')\">📦 Pre-Book via WhatsApp</button>";
+} else {
+  result.innerText = "❌ Item not found nearby";
       }
-    }
+      function openShopMap(shopName) {
+  var url =
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(shopName + " Tambaram Chennai");
+  window.open(url, "_blank");
+}
+
+function preBookItem(item) {
+  var phone = "916379159240"; // 👈 change this
+  var message =
+    "Hi, I want to pre-book the item: " + item;
+  var url =
+    "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+  window.open(url, "_blank");
+}
   </script>
 </body>
 </html>
