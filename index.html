@@ -36,10 +36,13 @@
   <h2>🔍 Quantum Item Finder</h2>
   <p>📍 Area: Tambaram</p>
 
-  <input id="itemInput" type="text" placeholder="Enter item name">
-  <br>
+  <input id="itemInput" type="text" placeholder="Enter item name" />
+  <br><br>
 
   <button onclick="findItem()">Find Item</button>
+  <br><br>
+
+  <button onclick="testWhatsApp()">🧪 Test WhatsApp</button>
   <br><br>
 
   <button onclick="openMap()">📍 Go to Shop</button>
@@ -55,39 +58,57 @@
       window.open(url, "_blank");
     }
 
-    <script>
-function findItem() {
-  var item = document.getElementById("itemInput").value.toLowerCase();
-  var result = document.getElementById("result");
+    function findItem() {
+      var item = document
+        .getElementById("itemInput")
+        .value.toLowerCase();
+      var result = document.getElementById("result");
 
-  if (item === "") {
-    result.innerText = "⚠️ Please enter an item";
-    return;
-  }
+      if (item === "") {
+        result.innerText = "⚠️ Please enter an item";
+        return;
+      }
 
-  var shops = {
-    mobile: "Sri Mobiles – Tambaram East",
-    laptop: "Tech World – Velachery",
-    charger: "FastCharge Shop – Chromepet"
-  };
+      var shops = {
+        mobile: "Sri Mobiles - Tambaram East",
+        laptop: "Tech World - Velachery",
+        charger: "FastCharge Shop - Chromepet"
+      };
 
-  if (shops[item]) {
-    result.innerHTML =
-      "✅ Item found at: <b>" + shops[item] + "</b><br><br>" +
-      "<button onclick=\"preBookItem('" + item + "')\">📲 Pre-Book on WhatsApp</button>";
-  } else {
-    result.innerText = "❌ Item not found nearby";
-  }
-}
+      if (shops[item]) {
+        result.innerHTML =
+          "✅ Item found at: <b>" +
+          shops[item] +
+          "</b><br><br>" +
+          "<button onclick=\"preBookItem('" +
+          item +
+          "')\">📲 Pre-Book on WhatsApp</button>";
+      } else {
+        result.innerText = "❌ Item not found nearby";
+      }
+    }
 
-function preBookItem(item) {
-  var phone = "916379159240"; // country code included
-  var message =
-    "Hi, I want to pre-book this item: " + item;
+    function testWhatsApp() {
+      var phone = "916379159240"; // change number if needed
+      var msg = "Hello, WhatsApp test from Quantum Item Finder";
+      var url =
+        "https://wa.me/" +
+        phone +
+        "?text=" +
+        encodeURIComponent(msg);
+      window.location.href = url;
+    }
 
-  var url =
-    "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
-
-  window.open(url, "_blank");
-}
+    function preBookItem(item) {
+      var phone = "916379159240"; // shop number
+      var msg = "Hi, I want to pre-book the item: " + item;
+      var url =
+        "https://wa.me/" +
+        phone +
+        "?text=" +
+        encodeURIComponent(msg);
+      window.location.href = url;
+    }
   </script>
+
+</body>
