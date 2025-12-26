@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Quantum Item Finder</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: green;
+      color: white;
+      border: none;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>🔍 Quantum Item Finder</h2>
+  <p>📍 Area: Tambaram</p>
+
+  <input id="itemInput" type="text" placeholder="Enter item name" />
+  <br>
+
+  <button onclick="findItem()">Find Item</button>
+  <br><br>
+
+  <button onclick="openMap()">📍 Go to Shop</button>
+
+  <p id="result"></p>
+
+  <script>
+    function openMap() {
+      var location = "Tambaram East Chennai";
+      var url =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(location);
+      window.open(url, "_blank");
+    }
+
+    function findItem() {
+      var item = document.getElementById("itemInput").value.toLowerCase();
+      var result = document.getElementById("result");
+
+      if (item === "") {
+        result.innerText = "⚠️ Please enter an item name";
+        return;
+      }
+
+      var shops = {
+        mobile: "Sri Mobiles – Tambaram East",
+        laptop: "Tech World – Velachery",
+        charger: "FastCharge Shop – Chromepet"
+      };
+
+      if (shops[item]) {
+        result.innerText = "✅ Item found at: " + shops[item];
+      } else {
+        result.innerText = "❌ Item not found nearby";
+      }
+    }
+  </script>
+</body>
+</html>
