@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Quantum Item Finder</title>
+
   <style>
     body {
       font-family: Arial;
@@ -25,15 +26,17 @@
     #result {
       margin-top: 20px;
       font-weight: bold;
+      color: black;
     }
   </style>
 </head>
 
 <body>
+
   <h2>🔍 Quantum Item Finder</h2>
   <p>📍 Area: Tambaram</p>
 
-  <input id="itemInput" type="text" placeholder="Enter item name" />
+  <input id="itemInput" type="text" placeholder="Enter item name">
   <br>
 
   <button onclick="findItem()">Find Item</button>
@@ -68,28 +71,12 @@
       };
 
       if (shops[item]) {
-  result.innerHTML =
-    "✅ Item found at:<br><b>" + shops[item] + "</b><br><br>" +
-    "<button onclick=\"openShopMap('" + shops[item] + "')\">📍 View Shop on Map</button><br><br>" +
-    "<button onclick=\"preBookItem('" + item + "')\">📦 Pre-Book via WhatsApp</button>";
-} else {
-  result.innerText = "❌ Item not found nearby";
+        result.innerText = "✅ Item found at: " + shops[item];
+      } else {
+        result.innerText = "❌ Item not found nearby";
       }
-      function openShopMap(shopName) {
-  var url =
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent(shopName + " Tambaram Chennai");
-  window.open(url, "_blank");
-}
-
-function preBookItem(item) {
-  var phone = "916379159240"; // 👈 change this
-  var message =
-    "Hi, I want to pre-book the item: " + item;
-  var url =
-    "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
-  window.open(url, "_blank");
-}
+    }
   </script>
+
 </body>
 </html>
