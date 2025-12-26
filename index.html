@@ -55,28 +55,39 @@
       window.open(url, "_blank");
     }
 
-    function findItem() {
-      var item = document.getElementById("itemInput").value.toLowerCase();
-      var result = document.getElementById("result");
+    <script>
+function findItem() {
+  var item = document.getElementById("itemInput").value.toLowerCase();
+  var result = document.getElementById("result");
 
-      if (item === "") {
-        result.innerText = "⚠️ Please enter an item name";
-        return;
-      }
+  if (item === "") {
+    result.innerText = "⚠️ Please enter an item";
+    return;
+  }
 
-      var shops = {
-        mobile: "Sri Mobiles – Tambaram East",
-        laptop: "Tech World – Velachery",
-        charger: "FastCharge Shop – Chromepet"
-      };
+  var shops = {
+    mobile: "Sri Mobiles – Tambaram East",
+    laptop: "Tech World – Velachery",
+    charger: "FastCharge Shop – Chromepet"
+  };
 
-      if (shops[item]) {
-        result.innerText = "✅ Item found at: " + shops[item];
-      } else {
-        result.innerText = "❌ Item not found nearby";
-      }
-    }
+  if (shops[item]) {
+    result.innerHTML =
+      "✅ Item found at: <b>" + shops[item] + "</b><br><br>" +
+      "<button onclick=\"preBookItem('" + item + "')\">📲 Pre-Book on WhatsApp</button>";
+  } else {
+    result.innerText = "❌ Item not found nearby";
+  }
+}
+
+function preBookItem(item) {
+  var phone = "916379159240"; // country code included
+  var message =
+    "Hi, I want to pre-book this item: " + item;
+
+  var url =
+    "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+
+  window.open(url, "_blank");
+}
   </script>
-
-</body>
-</html>
