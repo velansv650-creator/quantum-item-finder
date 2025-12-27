@@ -85,29 +85,55 @@
       }
 
       var shops = {
-        mobile: "Sri Mobiles - Tambaram East",
-        laptop: "Tech World - Velachery",
-        charger: "FastCharge Shop - Chromepet",
-        tv: "Sony TV Showroom - Tambaram",
-        fridge: "LG Store - Selaiyur",
-        ac: "Samsung AC Center - Medavakkam"
-      };
+  mobile: {
+    name: "Sri Mobiles",
+    area: "Tambaram East",
+    phone: "916379159240"
+  },
+  laptop: {
+    name: "Tech World",
+    area: "Velachery",
+    phone: "916379159240"
+  },
+  charger: {
+    name: "FastCharge Shop",
+    area: "Chromepet",
+    phone: "916379159240"
+  },
+  tv: {
+    name: "Sony TV Showroom",
+    area: "Tambaram",
+    phone: "916379159240"
+  },
+  fridge: {
+    name: "LG Store",
+    area: "Selaiyur",
+    phone: "916379159240"
+  },
+  ac: {
+    name: "Samsung AC Center",
+    area: "Medavakkam",
+    phone: "916379159240"
+  }
+};
 
       if (shops[item]) {
-        result.innerHTML =
-          "✅ Item found at:<br><br><b>" +
-          shops[item] +
-          "</b><br><br>" +
-          "<button onclick=\"openShopMap('" +
-          shops[item] +
-          "')\">📍 Go to Shop</button><br><br>" +
-          "<button onclick=\"preBookItem('" +
-          item +
-          "')\">💬 Pre-Book on WhatsApp</button>";
-      } else {
-        result.innerText = "❌ Item not found nearby";
+  result.innerHTML =
+    "✅ Item found at:<br><br><b>" +
+    shops[item].name +
+    "</b><br>📍 Area: " +
+    shops[item].area +
+    "<br><br>" +
+    "<button onclick=\"openShopMap('" +
+    shops[item].name + " " + shops[item].area +
+    "')\">📍 Go to Shop</button><br><br>" +
+    "<button onclick=\"preBookItem('" +
+    item + "','" +
+    shops[item].phone +
+    "')\">💬 Pre-Book on WhatsApp</button>";
+} else {
+  result.innerText = "❌ Item not found nearby";
       }
-    }
 
     function openShopMap(shopName) {
       var url =
@@ -116,15 +142,19 @@
       window.open(url, "_blank");
     }
 
-    function preBookItem(item) {
-      var phone = "916379159240"; // 🔴 un WhatsApp number (change pannalaam)
-      var message = "Hi, I want to pre-book the item: " + item;
-      var url =
-        "https://wa.me/" +
-        phone +
-        "?text=" +
-        encodeURIComponent(message);
-      window.open(url, "_blank");
+    function preBookItem(item, phone) {
+  var message =
+    "Hi 👋 I want to pre-book this item:\n\n" +
+    "🛒 Item: " + item +
+    "\n📍 Area: Tambaram\n\nPlease confirm availability.";
+
+  var url =
+    "https://wa.me/" +
+    phone +
+    "?text=" +
+    encodeURIComponent(message);
+
+  window.open(url, "_blank");
     }
   </script>
 
