@@ -119,22 +119,27 @@
 
       if (shops[item]) {
   result.innerHTML =
-    "✅ Item found at:<br><br><b>" +
-    shops[item].name +
-    "</b><br>📍 Area: " +
-    shops[item].area +
-    "<br><br>" +
-    "<button onclick=\"openShopMap('" +
-    shops[item].name + " " + shops[item].area +
-    "')\">📍 Go to Shop</button><br><br>" +
-    "<button onclick=\"preBookItem('" +
-    item + "','" +
-    shops[item].phone +
-    "')\">💬 Pre-Book on WhatsApp</button>";
-} else {
-  result.innerText = "❌ Item not found nearby";
-      }
+"✅ Item found at:<br><br><b>" +
+shops[item].name +
+"</b><br>📍 Area: " +
+shops[item].area +
+"<br><br>" +
 
+"<button onclick=\"openShopMap('" +
+shops[item].name + " " + shops[item].area +
+"')\">📍 Go to Shop</button><br><br>" +
+
+"<button onclick=\"callShop('" +
+shops[item].phone +
+"')\">📞 Call Shop</button><br><br>" +
+
+"<button onclick=\"preBookItem('" +
+item + "','" +
+shops[item].phone +
+"')\">💬 Pre-Book on WhatsApp</button>";
+function callShop(phone) {
+  window.open("tel:" + phone);
+}
     function openShopMap(shopName) {
       var url =
         "https://www.google.com/maps/search/?api=1&query=" +
