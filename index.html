@@ -1,55 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Quantum Item Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f4f6f7;
+    }
+
+    input {
+      padding: 10px;
+      width: 85%;
+      max-width: 360px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin: 6px;
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1b5e20;
+    }
+
+    .shop-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 
-<body style="text-align:center; font-family:Arial;">
+<body>
 
   <h2>🔍 Quantum Item Finder</h2>
-  <p>📍 Area: Tambaram</p>
+  <p>📍 Location: Tambaram & Nearby Areas</p>
 
   <input
-    type="text"
     id="itemInput"
-    placeholder="Enter item (ex: mobile)"
-    style="padding:10px; width:80%; max-width:300px;"
+    type="text"
+    placeholder="Enter item (mobile, tv, laptop, fridge, ac)"
   >
   <br><br>
 
   <button onclick="findItem()">Find Item</button>
 
-  <p id="result"></p>
-<script>
-function callShop(phone) {
-  window.location.href = "tel:" + phone;
-}
+  <div id="result"></div>
 
-function openShopMap(place) {
-  var url =
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent(place);
-  window.open(url, "_blank");
-}
+  <script>
+    function findItem() {
+      var item = document.getElementById("itemInput").value
+        .toLowerCase()
+        .trim();
 
-function preBookItem(item, phone) {
-  var message =
-    "Hi 👋 I want to pre-book this item:\n\n" +
-    "🛒 Item: " + item + "\n" +
-    "📍 Area: Tambaram\n\n" +
-    "Please confirm availability.";
+      var result = document.getElementById("result");
+      result.innerHTML = "";
 
-  var url =
-    "https://wa.me/" +
-    phone +
-    "?text=" +
-    encodeURIComponent(message);
+      if (item === "") {
+        result.innerHTML = "⚠️ Please enter an item name";
+        return;
+      }
 
-  window.open(url, "_blank");
-}
-</script>
-    
+      /* 🔹 ALL AREAS + SHOPS DATA */
+      var shops = {
+        mobile: [
+          { name: "Sri Mobiles", area: "Tambaram East", phone: "916379159240" },
+          { name: "Sathya Mobiles", area: "Chromepet", phone: "916379159240" },
+          { name: "Poorvika Mobiles", area: "Medavakkam", phone: "916379159240" }
+        ],
+
+        tv: [
+          { name: "Sony Showroom", area: "Tambaram", phone: "916379159240" },
+          { name: "Reliance Digital", area: "Velachery", phone: "916379159240" }
+        ],
+
+        laptop: [
+          { name: "Tech World", area: "Velachery", phone: "916379159240" },
+          { name: "HP Store", area: "Chromepet", phone: "916379159240" }
+        ],
+
+        fridge: [
+          { name: "LG Store", area: "Selaiyur", phone: "916379159240" },
+          { name: "Samsung Plaza", area: "Medavakkam", phone: "916379159240" }
+        ],
+
+        ac: [
+          { name: "Blue Star AC", area: "Tambaram West", phone: "916379159240" },
+          { name: "Daikin Dealer", area: "Chromepet", phone: "916379159240" }
+        ]
+      };
+
+      if (!shops[item]) {
+        result.innerHTML = "❌ Item not found in nearby areas";
+        return;
+      }
+
+      result.innerHTML = "✅ <b>Available Shops:</b><br>";
+
+      shops[item].forEach(function(shop) {
+        result.innerHTML += `
+          <div class="shop-box">
+            <b>${shop.name}</b><br>
+            📍 Area: ${shop.area}<br><br>
+
+            <button onclick="openMap('${shop.name} ${shop.area}')">📍 Go to Shop</button><br>
+            <button onclick="callShop('${shop.phone}')">📞 Call Shop</button><br>
+            <button onclick="preBook('${item}','${shop.phone}')">💬 Pre-Book on WhatsApp</button>
+          </div>
+        `;
+      });
+    }
+
+    function openMap(place) {
+      var url =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(place);
+      window.open(url, "_blank");
+    }
+
+    function callShop(phone) {
+      window.location.href = "tel:" + phone;
+    }
+
+    function preBook(item, phone) {
+      var message =
+        "Hi 👋 I want to pre-book this item:\n\n" +
+        "🛒 Item: " + item + "\n" +
+        "📍 Area: Tambaram\n\n" +
+        "Please confirm availability.";
+
+      var url =
+        "https://wa.me/" +
+        phone +
+        "?text=" +
+        encodeURIComponent(message);
+
+      window.open(url, "_blank");
+    }
+  </script>
 
 </body>
 </html>
