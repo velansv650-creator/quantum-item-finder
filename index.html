@@ -62,106 +62,52 @@
   <p id="result"></p>
 
   <script>
-    function openMap() {
-      var location = "Tambaram East Chennai";
-      var url =
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(location);
-      window.open(url, "_blank");
-    }
+function findItem() {
+  var item = document.getElementById("itemInput").value
+    .toLowerCase()
+    .trim();
 
-    function findItem() {
-      var item = document
-        .getElementById("itemInput")
-        .value
-        .toLowerCase()
-        .trim();
+  var result = document.getElementById("result");
 
-      var result = document.getElementById("result");
-
-      if (item === "") {
-        result.innerText = "⚠️ Please enter an item name";
-        return;
-      }
-
-      var shops = {
-  mobile: {
-    name: "Sri Mobiles",
-    area: "Tambaram East",
-    phone: "916379159240"
-  },
-  laptop: {
-    name: "Tech World",
-    area: "Velachery",
-    phone: "916379159240"
-  },
-  charger: {
-    name: "FastCharge Shop",
-    area: "Chromepet",
-    phone: "916379159240"
-  },
-  tv: {
-    name: "Sony TV Showroom",
-    area: "Tambaram",
-    phone: "916379159240"
-  },
-  fridge: {
-    name: "LG Store",
-    area: "Selaiyur",
-    phone: "916379159240"
-  },
-  ac: {
-    name: "Samsung AC Center",
-    area: "Medavakkam",
-    phone: "916379159240"
+  if (item === "") {
+    result.innerText = "⚠️ Please enter an item";
+    return;
   }
-};
 
-      if (shops[item]) {
-  result.innerHTML =
-"✅ Item found at:<br><br><b>" +
-shops[item].name +
-"</b><br>📍 Area: " +
-shops[item].area +
-"<br><br>" +
+  var shops = {
+    mobile: {
+      name: "Sri Mobiles",
+      area: "Tambaram East",
+      phone: "916379159240"
+    }
+  };
 
-"<button onclick=\"openShopMap('" +
-shops[item].name + " " + shops[item].area +
-"')\">📍 Go to Shop</button><br><br>" +
+  if (shops[item]) {
+    result.innerHTML =
+      "✅ Item found at:<br><br><b>" +
+      shops[item].name +
+      "</b><br>📍 Area: " +
+      shops[item].area +
+      "<br><br>" +
 
-"<button onclick=\"callShop('" +
-shops[item].phone +
-"')\">📞 Call Shop</button><br><br>" +
+      "<button onclick=\"openShopMap('" +
+      shops[item].name + " " + shops[item].area +
+      "')\">📍 Go to Shop</button><br><br>" +
 
-"<button onclick=\"preBookItem('" +
-item + "','" +
-shops[item].phone +
-"')\">💬 Pre-Book on WhatsApp</button>";
-function callShop(phone) {
-  window.open("tel:" + phone);
+      "<button onclick=\"callShop('" +
+      shops[item].phone +
+      "')\">📞 Call Shop</button><br><br>" +
+
+      "<button onclick=\"preBookItem('" +
+      item + "','" +
+      shops[item].phone +
+      "')\">💬 Pre-Book on WhatsApp</button>";
+  } else {
+    result.innerText = "❌ Item not found nearby";
+  }
 }
-    function openShopMap(shopName) {
-      var url =
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(shopName + " Tambaram Chennai");
-      window.open(url, "_blank");
-    }
-
-    function preBookItem(item, phone) {
-  var message =
-    "Hi 👋 I want to pre-book this item:\n\n" +
-    "🛒 Item: " + item +
-    "\n📍 Area: Tambaram\n\nPlease confirm availability.";
-
-  var url =
-    "https://wa.me/" +
-    phone +
-    "?text=" +
-    encodeURIComponent(message);
-
-  window.open(url, "_blank");
-    }
   </script>
+   
 
 </body>
 </html>
