@@ -12,14 +12,15 @@ body {
   padding: 20px;
   background: #f4f6f7;
 }
-input {
+select, input {
   padding: 10px;
   width: 90%;
   max-width: 380px;
+  margin-top: 8px;
 }
 button {
   padding: 10px 16px;
-  margin: 6px;
+  margin: 8px;
   background: #2e7d32;
   color: #fff;
   border: none;
@@ -38,110 +39,123 @@ button {
 <body>
 
 <h2>🔍 Quantum Item Finder</h2>
-<p>📍 Tambaram & Nearby Areas</p>
 
+<!-- AREA SELECT -->
+<select id="areaSelect">
+  <option value="">📍 Select Area</option>
+  <option value="Tambaram East">Tambaram East</option>
+  <option value="Tambaram West">Tambaram West</option>
+  <option value="Chromepet">Chromepet</option>
+  <option value="Medavakkam">Medavakkam</option>
+  <option value="Velachery">Velachery</option>
+  <option value="Selaiyur">Selaiyur</option>
+  <option value="Pallavaram">Pallavaram</option>
+  <option value="Perungalathur">Perungalathur</option>
+</select>
+
+<br>
+
+<!-- ITEM INPUT -->
 <input id="itemInput" placeholder="Eg: pen, notebook, rice, mobile">
-<br><br>
+
+<br>
 <button onclick="findItem()">Find Item</button>
 
 <div id="result"></div>
 
 <script>
-/* ================= ITEM → CATEGORY MAP ================= */
+/* ========= ITEM → CATEGORY ========= */
 var itemCategoryMap = {
-  // Stationery
   pen:"stationery", pencil:"stationery", notebook:"stationery",
-  eraser:"stationery", scale:"stationery", sharpener:"stationery",
-  file:"stationery", stapler:"stationery", xerox:"stationery",
+  scale:"stationery", eraser:"stationery", xerox:"stationery",
 
-  // Grocery
   rice:"grocery", sugar:"grocery", oil:"grocery", milk:"grocery",
-  bread:"grocery", biscuit:"grocery", soap:"grocery", shampoo:"grocery",
+  soap:"grocery", shampoo:"grocery",
 
-  // Electronics
   mobile:"mobile", tv:"tv", laptop:"laptop",
-
-  // Appliances
   fridge:"fridge", ac:"ac",
 
-  // Hardware
-  hammer:"hardware", nails:"hardware", pipe:"hardware"
+  hammer:"hardware", nails:"hardware"
 };
 
-/* ================= CATEGORY → SHOPS ================= */
+/* ========= CATEGORY → SHOPS ========= */
 var shops = {
   stationery: [
     {name:"Lakshmi Stationery",area:"Tambaram East",phone:"916379159240"},
     {name:"Student Stationery",area:"Medavakkam",phone:"916379159240"}
   ],
-
   grocery: [
     {name:"Reliance Smart",area:"Velachery",phone:"916379159240"},
     {name:"Nilgiris",area:"Chromepet",phone:"916379159240"}
   ],
-
   mobile: [
     {name:"Sri Mobiles",area:"Tambaram East",phone:"916379159240"},
     {name:"Poorvika Mobiles",area:"Pallavaram",phone:"916379159240"}
   ],
-
   tv: [
     {name:"Sony Showroom",area:"Tambaram West",phone:"916379159240"}
   ],
-
   laptop: [
     {name:"Tech World",area:"Velachery",phone:"916379159240"}
   ],
-
   fridge: [
     {name:"LG Store",area:"Selaiyur",phone:"916379159240"}
   ],
-
   ac: [
     {name:"Blue Star Dealer",area:"Perungalathur",phone:"916379159240"}
   ],
-
   hardware: [
     {name:"Ram Hardware",area:"Perungalathur",phone:"916379159240"}
   ]
 };
 
-/* ================= MAIN FUNCTION ================= */
+/* ========= MAIN LOGIC ========= */
 function findItem() {
-  var input = document.getElementById("itemInput").value.toLowerCase().trim();
+  var item = document.getElementById("itemInput").value.toLowerCase().trim();
+  var selectedArea = document.getElementById("areaSelect").value;
   var result = document.getElementById("result");
   result.innerHTML = "";
 
-  if (input === "") {
-    result.innerHTML = "⚠️ Please enter item name";
+  if (item === "") {
+    result.innerHTML = "⚠️ Enter item name";
     return;
   }
 
-  var category = itemCategoryMap[input];
-  if (!category || !shops[category]) {
-    result.innerHTML = "❌ Item not found in nearby shops";
+  var category = itemCategoryMap[item];
+  if (!category) {
+    result.innerHTML = "❌ Item not found";
+    return;
+  }
+
+  var filteredShops = shops[category].filter(function(shop){
+    return selectedArea === "" || shop.area === selectedArea;
+  });
+
+  if (filteredShops.length === 0) {
+    result.innerHTML = "❌ No shops found in selected area";
     return;
   }
 
   result.innerHTML =
-    "✅ <b>" + input + "</b> available in <b>" +
-    category.toUpperCase() + "</b> shops:";
+    "✅ <b>" + item + "</b> available in <b>" +
+    (selectedArea || "nearby areas") +
+    "</b>:";
 
-  shops[category].forEach(function(shop){
+  filteredShops.forEach(function(shop){
     result.innerHTML += `
       <div class="shop-box">
         <b>${shop.name}</b><br>
         📍 ${shop.area}<br><br>
 
-        <button onclick="openMap('${shop.name} ${shop.area}')">📍 Map</button><br>
-        <button onclick="callShop('${shop.phone}')">📞 Call</button><br>
-        <button onclick="preBook('${input}','${shop.phone}')">💬 WhatsApp</button>
+        <button onclick="openMap('${shop.name} ${shop.area}')">📍 Map</button>
+        <button onclick="callShop('${shop.phone}')">📞 Call</button>
+        <button onclick="preBook('${item}','${shop.phone}')">💬 WhatsApp</button>
       </div>
     `;
   });
 }
 
-/* ================= HELPERS ================= */
+/* ========= HELPERS ========= */
 function openMap(place) {
   window.open(
     "https://www.google.com/maps/search/?api=1&query=" +
@@ -158,7 +172,7 @@ function preBook(item, phone) {
   var msg =
     "Hi 👋 I want to pre-book:\n" +
     "🛒 Item: " + item + "\n" +
-    "📍 Area: Tambaram\n\n" +
+    "📍 Area: " + document.getElementById("areaSelect").value + "\n\n" +
     "Please confirm availability.";
 
   window.open(
