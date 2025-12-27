@@ -21,47 +21,7 @@
   <button onclick="findItem()">Find Item</button>
 
   <p id="result"></p>
-
-  <script>
-    function findItem() {
-      var item = document.getElementById("itemInput").value
-        .toLowerCase()
-        .trim();
-
-      var result = document.getElementById("result");
-
-      if (item === "") {
-        result.innerText = "⚠️ Please enter an item";
-        return;
-      }
-
-      var shops = {
-        mobile: {
-          name: "Sri Mobiles",
-          area: "Tambaram East",
-          phone: "916379159240"
-        }
-      };
-
-        if (shops[item]) {
-  result.innerHTML =
-    "✅ <b>Item found at:</b><br><br>" +
-    "<b>" + shops[item].name + "</b><br>" +
-    "📍 Area: " + shops[item].area + "<br><br>" +
-
-    "<button onclick=\"openShopMap('" +
-    shops[item].name + " " + shops[item].area +
-    "')\">📍 Go to Shop</button><br><br>" +
-
-    "<button onclick=\"callShop('" +
-    shops[item].phone +
-    "')\">📞 Call Shop</button><br><br>" +
-
-    "<button onclick=\"preBookItem('" +
-    item + "','" +
-    shops[item].phone +
-    "')\">💬 Pre-Book on WhatsApp</button>";
-        }
+<script>
 function callShop(phone) {
   window.location.href = "tel:" + phone;
 }
@@ -88,8 +48,8 @@ function preBookItem(item, phone) {
 
   window.open(url, "_blank");
 }
+</script>
     
-  </script>
 
 </body>
 </html>
