@@ -1,156 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Quantum Item Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Quantum Item Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f4f6f7;
-    }
-
-    input {
-      padding: 10px;
-      width: 85%;
-      max-width: 360px;
-      margin-top: 10px;
-    }
-
-    button {
-      padding: 10px 16px;
-      margin: 6px;
-      background: #2e7d32;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1b5e20;
-    }
-
-    .shop-box {
-      margin-top: 15px;
-      padding: 12px;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-  </style>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #f4f6f7;
+}
+input {
+  padding: 10px;
+  width: 90%;
+  max-width: 360px;
+}
+button {
+  padding: 10px 16px;
+  margin: 6px;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+.shop-box {
+  background: #fff;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+</style>
 </head>
 
 <body>
 
-  <h2>🔍 Quantum Item Finder</h2>
-  <p>📍 Location: Tambaram & Nearby Areas</p>
+<h2>🔍 Quantum Item Finder</h2>
+<p>📍 Tambaram & Nearby Areas</p>
 
-  <input
-    id="itemInput"
-    type="text"
-    placeholder="Enter item (mobile, tv, laptop, fridge, ac)"
-  >
-  <br><br>
+<input id="itemInput" placeholder="Eg: mobile, stationery, grocery">
+<br><br>
+<button onclick="findItem()">Find Item</button>
 
-  <button onclick="findItem()">Find Item</button>
+<div id="result"></div>
 
-  <div id="result"></div>
+<script>
+function findItem() {
+  var item = document.getElementById("itemInput").value.toLowerCase().trim();
+  var result = document.getElementById("result");
+  result.innerHTML = "";
 
-  <script>
-    function findItem() {
-      var item = document.getElementById("itemInput").value
-        .toLowerCase()
-        .trim();
+  if (item === "") {
+    result.innerHTML = "⚠️ Please enter item name";
+    return;
+  }
 
-      var result = document.getElementById("result");
-      result.innerHTML = "";
+  /* 🔥 FULL DATA */
+  var shops = {
 
-      if (item === "") {
-        result.innerHTML = "⚠️ Please enter an item name";
-        return;
-      }
+    mobile: [
+      {name:"Sri Mobiles",area:"Tambaram East",phone:"916379159240"},
+      {name:"Poorvika Mobiles",area:"Chromepet",phone:"916379159240"}
+    ],
 
-      /* 🔹 ALL AREAS + SHOPS DATA */
-      var shops = {
-        mobile: [
-          { name: "Sri Mobiles", area: "Tambaram East", phone: "916379159240" },
-          { name: "Sathya Mobiles", area: "Chromepet", phone: "916379159240" },
-          { name: "Poorvika Mobiles", area: "Medavakkam", phone: "916379159240" }
-        ],
+    laptop: [
+      {name:"Tech World",area:"Velachery",phone:"916379159240"},
+      {name:"HP Store",area:"Pallavaram",phone:"916379159240"}
+    ],
 
-        tv: [
-          { name: "Sony Showroom", area: "Tambaram", phone: "916379159240" },
-          { name: "Reliance Digital", area: "Velachery", phone: "916379159240" }
-        ],
+    tv: [
+      {name:"Sony Showroom",area:"Tambaram West",phone:"916379159240"}
+    ],
 
-        laptop: [
-          { name: "Tech World", area: "Velachery", phone: "916379159240" },
-          { name: "HP Store", area: "Chromepet", phone: "916379159240" }
-        ],
+    ac: [
+      {name:"Blue Star Dealer",area:"Perungalathur",phone:"916379159240"}
+    ],
 
-        fridge: [
-          { name: "LG Store", area: "Selaiyur", phone: "916379159240" },
-          { name: "Samsung Plaza", area: "Medavakkam", phone: "916379159240" }
-        ],
+    fridge: [
+      {name:"LG Store",area:"Selaiyur",phone:"916379159240"}
+    ],
 
-        ac: [
-          { name: "Blue Star AC", area: "Tambaram West", phone: "916379159240" },
-          { name: "Daikin Dealer", area: "Chromepet", phone: "916379159240" }
-        ]
-      };
+    stationery: [
+      {name:"Lakshmi Stationery",area:"Tambaram East",phone:"916379159240"},
+      {name:"Student Stationery",area:"Medavakkam",phone:"916379159240"}
+    ],
 
-      if (!shops[item]) {
-        result.innerHTML = "❌ Item not found in nearby areas";
-        return;
-      }
+    grocery: [
+      {name:"Reliance Smart",area:"Velachery",phone:"916379159240"},
+      {name:"Nilgiris",area:"Chromepet",phone:"916379159240"}
+    ],
 
-      result.innerHTML = "✅ <b>Available Shops:</b><br>";
+    supermarket: [
+      {name:"More Supermarket",area:"Selaiyur",phone:"916379159240"}
+    ],
 
-      shops[item].forEach(function(shop) {
-        result.innerHTML += `
-          <div class="shop-box">
-            <b>${shop.name}</b><br>
-            📍 Area: ${shop.area}<br><br>
+    xerox: [
+      {name:"Fast Xerox",area:"Tambaram West",phone:"916379159240"}
+    ],
 
-            <button onclick="openMap('${shop.name} ${shop.area}')">📍 Go to Shop</button><br>
-            <button onclick="callShop('${shop.phone}')">📞 Call Shop</button><br>
-            <button onclick="preBook('${item}','${shop.phone}')">💬 Pre-Book on WhatsApp</button>
-          </div>
-        `;
-      });
-    }
+    electronics: [
+      {name:"Sathya Electronics",area:"Pallavaram",phone:"916379159240"}
+    ],
 
-    function openMap(place) {
-      var url =
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(place);
-      window.open(url, "_blank");
-    }
+    hardware: [
+      {name:"Ram Hardware",area:"Perungalathur",phone:"916379159240"}
+    ]
+  };
 
-    function callShop(phone) {
-      window.location.href = "tel:" + phone;
-    }
+  if (!shops[item]) {
+    result.innerHTML = "❌ Item not found";
+    return;
+  }
 
-    function preBook(item, phone) {
-      var message =
-        "Hi 👋 I want to pre-book this item:\n\n" +
-        "🛒 Item: " + item + "\n" +
-        "📍 Area: Tambaram\n\n" +
-        "Please confirm availability.";
+  result.innerHTML = "✅ <b>Available Shops:</b><br>";
 
-      var url =
-        "https://wa.me/" +
-        phone +
-        "?text=" +
-        encodeURIComponent(message);
+  shops[item].forEach(function(shop){
+    result.innerHTML += `
+      <div class="shop-box">
+        <b>${shop.name}</b><br>
+        📍 ${shop.area}<br><br>
 
-      window.open(url, "_blank");
-    }
-  </script>
+        <button onclick="openMap('${shop.name} ${shop.area}')">📍 Map</button><br>
+        <button onclick="callShop('${shop.phone}')">📞 Call</button><br>
+        <button onclick="preBook('${item}','${shop.phone}')">💬 WhatsApp</button>
+      </div>
+    `;
+  });
+}
+
+function openMap(place) {
+  window.open(
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(place),
+    "_blank"
+  );
+}
+
+function callShop(phone) {
+  window.location.href = "tel:" + phone;
+}
+
+function preBook(item, phone) {
+  var msg =
+    "Hi 👋 I want to pre-book:\n" +
+    "🛒 Item: " + item + "\n" +
+    "📍 Area: Tambaram\n\n" +
+    "Please confirm availability.";
+
+  window.open(
+    "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg),
+    "_blank"
+  );
+}
+</script>
 
 </body>
 </html>
