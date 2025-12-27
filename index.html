@@ -15,7 +15,7 @@ body {
 input {
   padding: 10px;
   width: 90%;
-  max-width: 360px;
+  max-width: 380px;
 }
 button {
   padding: 10px 16px;
@@ -40,83 +40,94 @@ button {
 <h2>🔍 Quantum Item Finder</h2>
 <p>📍 Tambaram & Nearby Areas</p>
 
-<input id="itemInput" placeholder="Eg: mobile, stationery, grocery">
+<input id="itemInput" placeholder="Eg: pen, notebook, rice, mobile">
 <br><br>
 <button onclick="findItem()">Find Item</button>
 
 <div id="result"></div>
 
 <script>
+/* ================= ITEM → CATEGORY MAP ================= */
+var itemCategoryMap = {
+  // Stationery
+  pen:"stationery", pencil:"stationery", notebook:"stationery",
+  eraser:"stationery", scale:"stationery", sharpener:"stationery",
+  file:"stationery", stapler:"stationery", xerox:"stationery",
+
+  // Grocery
+  rice:"grocery", sugar:"grocery", oil:"grocery", milk:"grocery",
+  bread:"grocery", biscuit:"grocery", soap:"grocery", shampoo:"grocery",
+
+  // Electronics
+  mobile:"mobile", tv:"tv", laptop:"laptop",
+
+  // Appliances
+  fridge:"fridge", ac:"ac",
+
+  // Hardware
+  hammer:"hardware", nails:"hardware", pipe:"hardware"
+};
+
+/* ================= CATEGORY → SHOPS ================= */
+var shops = {
+  stationery: [
+    {name:"Lakshmi Stationery",area:"Tambaram East",phone:"916379159240"},
+    {name:"Student Stationery",area:"Medavakkam",phone:"916379159240"}
+  ],
+
+  grocery: [
+    {name:"Reliance Smart",area:"Velachery",phone:"916379159240"},
+    {name:"Nilgiris",area:"Chromepet",phone:"916379159240"}
+  ],
+
+  mobile: [
+    {name:"Sri Mobiles",area:"Tambaram East",phone:"916379159240"},
+    {name:"Poorvika Mobiles",area:"Pallavaram",phone:"916379159240"}
+  ],
+
+  tv: [
+    {name:"Sony Showroom",area:"Tambaram West",phone:"916379159240"}
+  ],
+
+  laptop: [
+    {name:"Tech World",area:"Velachery",phone:"916379159240"}
+  ],
+
+  fridge: [
+    {name:"LG Store",area:"Selaiyur",phone:"916379159240"}
+  ],
+
+  ac: [
+    {name:"Blue Star Dealer",area:"Perungalathur",phone:"916379159240"}
+  ],
+
+  hardware: [
+    {name:"Ram Hardware",area:"Perungalathur",phone:"916379159240"}
+  ]
+};
+
+/* ================= MAIN FUNCTION ================= */
 function findItem() {
-  var item = document.getElementById("itemInput").value.toLowerCase().trim();
+  var input = document.getElementById("itemInput").value.toLowerCase().trim();
   var result = document.getElementById("result");
   result.innerHTML = "";
 
-  if (item === "") {
+  if (input === "") {
     result.innerHTML = "⚠️ Please enter item name";
     return;
   }
 
-  /* 🔥 FULL DATA */
-  var shops = {
-
-    mobile: [
-      {name:"Sri Mobiles",area:"Tambaram East",phone:"916379159240"},
-      {name:"Poorvika Mobiles",area:"Chromepet",phone:"916379159240"}
-    ],
-
-    laptop: [
-      {name:"Tech World",area:"Velachery",phone:"916379159240"},
-      {name:"HP Store",area:"Pallavaram",phone:"916379159240"}
-    ],
-
-    tv: [
-      {name:"Sony Showroom",area:"Tambaram West",phone:"916379159240"}
-    ],
-
-    ac: [
-      {name:"Blue Star Dealer",area:"Perungalathur",phone:"916379159240"}
-    ],
-
-    fridge: [
-      {name:"LG Store",area:"Selaiyur",phone:"916379159240"}
-    ],
-
-    stationery: [
-      {name:"Lakshmi Stationery",area:"Tambaram East",phone:"916379159240"},
-      {name:"Student Stationery",area:"Medavakkam",phone:"916379159240"}
-    ],
-
-    grocery: [
-      {name:"Reliance Smart",area:"Velachery",phone:"916379159240"},
-      {name:"Nilgiris",area:"Chromepet",phone:"916379159240"}
-    ],
-
-    supermarket: [
-      {name:"More Supermarket",area:"Selaiyur",phone:"916379159240"}
-    ],
-
-    xerox: [
-      {name:"Fast Xerox",area:"Tambaram West",phone:"916379159240"}
-    ],
-
-    electronics: [
-      {name:"Sathya Electronics",area:"Pallavaram",phone:"916379159240"}
-    ],
-
-    hardware: [
-      {name:"Ram Hardware",area:"Perungalathur",phone:"916379159240"}
-    ]
-  };
-
-  if (!shops[item]) {
-    result.innerHTML = "❌ Item not found";
+  var category = itemCategoryMap[input];
+  if (!category || !shops[category]) {
+    result.innerHTML = "❌ Item not found in nearby shops";
     return;
   }
 
-  result.innerHTML = "✅ <b>Available Shops:</b><br>";
+  result.innerHTML =
+    "✅ <b>" + input + "</b> available in <b>" +
+    category.toUpperCase() + "</b> shops:";
 
-  shops[item].forEach(function(shop){
+  shops[category].forEach(function(shop){
     result.innerHTML += `
       <div class="shop-box">
         <b>${shop.name}</b><br>
@@ -124,12 +135,13 @@ function findItem() {
 
         <button onclick="openMap('${shop.name} ${shop.area}')">📍 Map</button><br>
         <button onclick="callShop('${shop.phone}')">📞 Call</button><br>
-        <button onclick="preBook('${item}','${shop.phone}')">💬 WhatsApp</button>
+        <button onclick="preBook('${input}','${shop.phone}')">💬 WhatsApp</button>
       </div>
     `;
   });
 }
 
+/* ================= HELPERS ================= */
 function openMap(place) {
   window.open(
     "https://www.google.com/maps/search/?api=1&query=" +
