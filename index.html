@@ -1,184 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Quantum Item Finder</title>
+<title>Quantum Item Finder – Chennai</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-  background: #f4f6f7;
-}
-select, input {
-  padding: 10px;
-  width: 90%;
-  max-width: 380px;
-  margin-top: 8px;
-}
-button {
-  padding: 10px 16px;
-  margin: 8px;
-  background: #2e7d32;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-}
-.shop-box {
-  background: #fff;
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.1);
-}
+body {font-family: Arial; padding:20px; text-align:center; background:#f4f6f7;}
+select,input,button {padding:10px; width:90%; max-width:420px; margin:6px;}
+button {background:#2e7d32;color:#fff;border:none;border-radius:6px;}
+.shop-box {background:#fff;padding:12px;margin-top:10px;border-radius:8px;}
 </style>
 </head>
 
 <body>
 
 <h2>🔍 Quantum Item Finder</h2>
+<p>🌆 Chennai – All Areas | All Shops | All Needs</p>
 
-<!-- AREA SELECT -->
-<select id="areaSelect">
-  <option value="">📍 Select Area</option>
-  <option value="Tambaram East">Tambaram East</option>
-  <option value="Tambaram West">Tambaram West</option>
-  <option value="Chromepet">Chromepet</option>
-  <option value="Medavakkam">Medavakkam</option>
-  <option value="Velachery">Velachery</option>
-  <option value="Selaiyur">Selaiyur</option>
-  <option value="Pallavaram">Pallavaram</option>
-  <option value="Perungalathur">Perungalathur</option>
+<select id="area">
+  <option value="">📍 All Chennai Areas</option>
+  <option>North Chennai</option>
+  <option>South Chennai</option>
+  <option>Central Chennai</option>
+  <option>West Chennai</option>
+  <option>OMR</option>
+  <option>ECR</option>
 </select>
 
-<br>
+<input id="item" placeholder="Eg: pen, rice, mechanic, hospital, tyre, spanner">
 
-<!-- ITEM INPUT -->
-<input id="itemInput" placeholder="Eg: pen, notebook, rice, mobile">
-
-<br>
-<button onclick="findItem()">Find Item</button>
+<button onclick="search()">Find</button>
 
 <div id="result"></div>
 
 <script>
-/* ========= ITEM → CATEGORY ========= */
-var itemCategoryMap = {
-  pen:"stationery", pencil:"stationery", notebook:"stationery",
-  scale:"stationery", eraser:"stationery", xerox:"stationery",
-
-  rice:"grocery", sugar:"grocery", oil:"grocery", milk:"grocery",
-  soap:"grocery", shampoo:"grocery",
-
-  mobile:"mobile", tv:"tv", laptop:"laptop",
-  fridge:"fridge", ac:"ac",
-
-  hammer:"hardware", nails:"hardware"
+/* 🔑 ITEM → CATEGORY */
+var map = {
+  // daily
+  rice:"grocery", oil:"grocery", milk:"grocery", soap:"grocery",
+  // stationery
+  pen:"stationery", notebook:"stationery", xerox:"stationery",
+  // medical
+  tablet:"medical", medicine:"medical", hospital:"hospital",
+  // electronics
+  mobile:"electronics", tv:"electronics", laptop:"electronics",
+  // tools & mechanic
+  spanner:"tools", drill:"tools", mechanic:"mechanic",
+  tyre:"mechanic", brake:"mechanic",
+  // services
+  plumber:"service", electrician:"service"
 };
 
-/* ========= CATEGORY → SHOPS ========= */
+/* 🏪 CATEGORY → GENERIC SHOPS (BIG + SMALL) */
 var shops = {
-  stationery: [
-    {name:"Lakshmi Stationery",area:"Tambaram East",phone:"916379159240"},
-    {name:"Student Stationery",area:"Medavakkam",phone:"916379159240"}
-  ],
-  grocery: [
-    {name:"Reliance Smart",area:"Velachery",phone:"916379159240"},
-    {name:"Nilgiris",area:"Chromepet",phone:"916379159240"}
-  ],
-  mobile: [
-    {name:"Sri Mobiles",area:"Tambaram East",phone:"916379159240"},
-    {name:"Poorvika Mobiles",area:"Pallavaram",phone:"916379159240"}
-  ],
-  tv: [
-    {name:"Sony Showroom",area:"Tambaram West",phone:"916379159240"}
-  ],
-  laptop: [
-    {name:"Tech World",area:"Velachery",phone:"916379159240"}
-  ],
-  fridge: [
-    {name:"LG Store",area:"Selaiyur",phone:"916379159240"}
-  ],
-  ac: [
-    {name:"Blue Star Dealer",area:"Perungalathur",phone:"916379159240"}
-  ],
-  hardware: [
-    {name:"Ram Hardware",area:"Perungalathur",phone:"916379159240"}
-  ]
+  grocery:["Supermarket","Local Grocery Shop"],
+  stationery:["Stationery Store","Book Shop"],
+  medical:["Pharmacy","Medical Store"],
+  hospital:["Private Hospital","Government Hospital"],
+  electronics:["Electronics Showroom","Mobile Repair Shop"],
+  tools:["Hardware Store","Tool Shop"],
+  mechanic:["Car Mechanic","Bike Mechanic"],
+  service:["Local Service Provider"]
 };
 
-/* ========= MAIN LOGIC ========= */
-function findItem() {
-  var item = document.getElementById("itemInput").value.toLowerCase().trim();
-  var selectedArea = document.getElementById("areaSelect").value;
-  var result = document.getElementById("result");
-  result.innerHTML = "";
+function search(){
+  var i = item.value.toLowerCase().trim();
+  var a = area.value || "Chennai";
+  var r = document.getElementById("result");
+  r.innerHTML="";
 
-  if (item === "") {
-    result.innerHTML = "⚠️ Enter item name";
-    return;
-  }
+  var c = map[i];
+  if(!c){ r.innerHTML="❌ Item/Service available in Chennai but not listed yet"; return;}
 
-  var category = itemCategoryMap[item];
-  if (!category) {
-    result.innerHTML = "❌ Item not found";
-    return;
-  }
+  r.innerHTML=`✅ <b>${i}</b> available across <b>${a}</b><br>`;
 
-  var filteredShops = shops[category].filter(function(shop){
-    return selectedArea === "" || shop.area === selectedArea;
-  });
-
-  if (filteredShops.length === 0) {
-    result.innerHTML = "❌ No shops found in selected area";
-    return;
-  }
-
-  result.innerHTML =
-    "✅ <b>" + item + "</b> available in <b>" +
-    (selectedArea || "nearby areas") +
-    "</b>:";
-
-  filteredShops.forEach(function(shop){
-    result.innerHTML += `
+  shops[c].forEach(s=>{
+    r.innerHTML+=`
       <div class="shop-box">
-        <b>${shop.name}</b><br>
-        📍 ${shop.area}<br><br>
-
-        <button onclick="openMap('${shop.name} ${shop.area}')">📍 Map</button>
-        <button onclick="callShop('${shop.phone}')">📞 Call</button>
-        <button onclick="preBook('${item}','${shop.phone}')">💬 WhatsApp</button>
+        <b>${s}</b><br>
+        📍 ${a}<br><br>
+        <button onclick="mapOpen('${s} ${a}')">📍 Map</button>
+        <button onclick="call()">📞 Call</button>
       </div>
     `;
   });
 }
 
-/* ========= HELPERS ========= */
-function openMap(place) {
-  window.open(
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent(place),
-    "_blank"
-  );
+function mapOpen(q){
+  window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q));
 }
-
-function callShop(phone) {
-  window.location.href = "tel:" + phone;
-}
-
-function preBook(item, phone) {
-  var msg =
-    "Hi 👋 I want to pre-book:\n" +
-    "🛒 Item: " + item + "\n" +
-    "📍 Area: " + document.getElementById("areaSelect").value + "\n\n" +
-    "Please confirm availability.";
-
-  window.open(
-    "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg),
-    "_blank"
-  );
+function call(){
+  alert("Call nearby shop (demo)");
 }
 </script>
 
