@@ -1,113 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2e7d32">
   <meta charset="UTF-8">
   <title>Quantum Item Finder</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f7f7f7;
-    }
-
-    input {
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      margin-top: 10px;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: green;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
 </head>
 
-<body>
+<body style="text-align:center; font-family:Arial;">
 
   <h2>🔍 Quantum Item Finder</h2>
   <p>📍 Area: Tambaram</p>
 
   <input
-    id="itemInput"
     type="text"
-    placeholder="Enter item name (mobile, tv, ac...)"
-  />
+    id="itemInput"
+    placeholder="Enter item (ex: mobile)"
+    style="padding:10px; width:80%; max-width:300px;"
+  >
+  <br><br>
 
-  <br>
   <button onclick="findItem()">Find Item</button>
-  <br>
-  <button onclick="openMap()">📍 Go to Shop Area</button>
 
   <p id="result"></p>
 
   <script>
-function findItem() {
-  var item = document.getElementById("itemInput").value
-    .toLowerCase()
-    .trim();
+    function findItem() {
+      var item = document.getElementById("itemInput").value
+        .toLowerCase()
+        .trim();
 
-  var result = document.getElementById("result");
+      var result = document.getElementById("result");
 
-  if (item === "") {
-    result.innerText = "⚠️ Please enter an item";
-    return;
-  }
+      if (item === "") {
+        result.innerText = "⚠️ Please enter an item";
+        return;
+      }
 
-  var shops = {
-    mobile: {
-      name: "Sri Mobiles",
-      area: "Tambaram East",
-      phone: "916379159240"
+      var shops = {
+        mobile: {
+          name: "Sri Mobiles",
+          area: "Tambaram East",
+          phone: "916379159240"
+        }
+      };
+
+      if (shops[item]) {
+        result.innerHTML =
+          "✅ Item found at:<br><br><b>" +
+          shops[item].name +
+          "</b><br>📍 Area: " +
+          shops[item].area +
+          "<br><br>" +
+          "<button onclick=\"callShop('" +
+          shops[item].phone +
+          "')\">📞 Call Shop</button>";
+      } else {
+        result.innerText = "❌ Item not found";
+      }
     }
-  };
 
-  if (shops[item]) {
-    result.innerHTML =
-      "✅ Item found at:<br><br><b>" +
-      shops[item].name +
-      "</b><br>📍 Area: " +
-      shops[item].area +
-      "<br><br>" +
-
-      "<button onclick=\"openShopMap('" +
-      shops[item].name + " " + shops[item].area +
-      "')\">📍 Go to Shop</button><br><br>" +
-
-      "<button onclick=\"callShop('" +
-      shops[item].phone +
-      "')\">📞 Call Shop</button><br><br>" +
-
-      "<button onclick=\"preBookItem('" +
-      item + "','" +
-      shops[item].phone +
-      "')\">💬 Pre-Book on WhatsApp</button>";
-  } else {
-    result.innerText = "❌ Item not found nearby";
-  }
-}
+    function callShop(phone) {
+      window.location.href = "tel:" + phone;
+    }
   </script>
-   
 
 </body>
 </html>
