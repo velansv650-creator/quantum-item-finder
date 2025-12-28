@@ -1,139 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Quantum Item Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Quantum Item Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // 🔐 YOUR FIREBASE CONFIG
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
-      authDomain: "quantum-item-finder.firebaseapp.com",
-      projectId: "quantum-item-finder",
-      storageBucket: "quantum-item-finder.appspot.com",
-      messagingSenderId: "855232416132",
-      appId: "1:855232416132:web:d10e2669d548477c0a75d1"
-    };
+/* 🔐 Firebase config */
+const firebaseConfig = {
+  apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
+  authDomain: "quantum-item-finder.firebaseapp.com",
+  projectId: "quantum-item-finder",
+  storageBucket: "quantum-item-finder.appspot.com",
+  messagingSenderId: "855232416132",
+  appId: "1:855232416132:web:d10e2669d548477c0a75d1"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-    // Elements
-    const loginBox = document.getElementById("loginBox");
-    const appBox = document.getElementById("appBox");
-    const msg = document.getElementById("msg");
+/* 🔄 Auth state */
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBox.style.display = "none";
+    appBox.style.display = "block";
+    userEmail.innerText = user.email;
+  } else {
+    appBox.style.display = "none";
+    loginBox.style.display = "block";
+  }
+});
 
-    // Auth state
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        loginBox.style.display = "none";
-        appBox.style.display = "block";
-        document.getElementById("userEmail").innerText = user.email;
-      } else {
-        loginBox.style.display = "block";
-        appBox.style.display = "none";
-      }
-    });
+/* Signup */
+window.signup = () => {
+  createUserWithEmailAndPassword(auth, email.value, password.value)
+    .catch(err => msg.innerText = err.message);
+};
 
-    // Signup
-    window.signup = () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
+/* Login */
+window.login = () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .catch(err => msg.innerText = err.message);
+};
 
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          msg.innerHTML = "✅ Signup successful!";
-          msg.style.color = "green";
-        })
-        .catch(err => {
-          msg.innerHTML = err.message;
-          msg.style.color = "red";
-        });
-    };
+/* Logout */
+window.logout = () => signOut(auth);
 
-    // Login
-    window.login = () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
+/* Fake search (demo) */
+window.searchItem = () => {
+  const q = search.value.trim();
+  result.innerHTML = q
+    ? `🔍 <b>${q}</b> available in nearby shops`
+    : "❌ Enter item name";
+};
+</script>
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          msg.innerHTML = "✅ Login successful!";
-          msg.style.color = "green";
-        })
-        .catch(err => {
-          msg.innerHTML = err.message;
-          msg.style.color = "red";
-        });
-    };
-
-    // Logout
-    window.logout = () => {
-      signOut(auth);
-    };
-  </script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f4f4f4;
-    }
-    .box {
-      max-width: 350px;
-      margin: 60px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,.1);
-      text-align: center;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    button {
-      background: #2e7d32;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    .logout {
-      background: #c62828;
-    }
-  </style>
+<style>
+body{margin:0;font-family:Arial;background:#f4f4f4}
+.box{max-width:360px;margin:40px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 0 10px #0002;text-align:center}
+input,button{width:100%;padding:10px;margin-top:10px;font-size:16px}
+button{background:#2e7d32;color:#fff;border:none;border-radius:5px}
+.logout{background:#c62828}
+.search{background:#1565c0}
+</style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN / SIGNUP -->
+<!-- 🔐 LOGIN PAGE -->
 <div class="box" id="loginBox">
   <h2>🔐 Login / Signup</h2>
-  <input id="emailInput" type="email" placeholder="Email">
-  <input id="passwordInput" type="password" placeholder="Password">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
   <button onclick="signup()">Signup</button>
   <button onclick="login()">Login</button>
-  <p id="msg"></p>
+  <p id="msg" style="color:red"></p>
 </div>
 
-<!-- 🚀 APP INSIDE PAGE -->
-<div class="box" id="appBox" style="display:none;">
-  <h2>🎉 Welcome to Quantum Item Finder</h2>
+<!-- 🔍 APP SEARCH PAGE -->
+<div class="box" id="appBox" style="display:none">
+  <h2>🔍 Quantum Item Finder</h2>
   <p>User: <b id="userEmail"></b></p>
-  <p>✅ App inside page loaded successfully</p>
+
+  <input id="search" placeholder="Search item (rice, tablet, charger...)">
+  <button class="search" onclick="searchItem()">Search</button>
+
+  <p id="result" style="margin-top:15px;color:green"></p>
+
   <button class="logout" onclick="logout()">Logout</button>
 </div>
 
