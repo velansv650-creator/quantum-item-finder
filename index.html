@@ -13,24 +13,23 @@
 body{
  margin:0;
  font-family:Poppins,sans-serif;
- background:linear-gradient(135deg,#0F2027,#203A43,#2C5364);
- color:#000;
+ background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 }
 .card{
- max-width:420px;
+ max-width:430px;
  margin:20px auto;
  background:#fff;
- padding:20px;
- border-radius:20px;
- box-shadow:0 25px 50px rgba(0,0,0,.4);
+ padding:22px;
+ border-radius:22px;
+ box-shadow:0 25px 60px rgba(0,0,0,.45);
 }
-h2{text-align:center;color:#0F2027;}
-.user{text-align:center;font-size:14px;margin-bottom:10px;color:#444;}
+h2{text-align:center;color:#0f2027;}
+.user{text-align:center;font-size:14px;color:#555;}
 input,select{
  width:100%;
  padding:14px;
  margin-bottom:12px;
- border-radius:12px;
+ border-radius:14px;
  border:1px solid #ccc;
  font-size:14px;
 }
@@ -38,35 +37,37 @@ button{
  width:100%;
  padding:14px;
  border:none;
- border-radius:14px;
+ border-radius:16px;
  font-weight:600;
  margin-bottom:10px;
  cursor:pointer;
 }
-.primary{background:linear-gradient(135deg,#1D976C,#93F9B9);}
 .search{background:linear-gradient(135deg,#396afc,#2948ff);color:#fff;}
 .logout{background:#b71c1c;color:#fff;}
 .shop{
  background:#f4f6f8;
  padding:14px;
- border-radius:14px;
- margin-top:12px;
- border-left:6px solid #1D976C;
+ border-radius:16px;
+ margin-top:14px;
+ border-left:6px solid #396afc;
 }
-.shop b{color:#1D976C;}
+.shop b{color:#396afc;}
 .actions{
  display:flex;
- justify-content:space-between;
+ gap:8px;
  margin-top:10px;
 }
 .actions button{
- width:32%;
+ flex:1;
  padding:10px;
  font-size:13px;
- border-radius:10px;
+ border-radius:12px;
 }
+.map{background:#2e7d32;color:#fff;}
+.call{background:#f9a825;color:#000;}
+.book{background:#6a1b9a;color:#fff;}
 .hide{display:none;}
-small{color:#555;}
+small{color:#777;}
 </style>
 </head>
 
@@ -77,8 +78,7 @@ small{color:#555;}
 <h2>🔐 Login / Signup</h2>
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
-<button class="primary" onclick="signup()">Signup</button>
-<button class="search" onclick="login()">Login</button>
+<button class="search" onclick="login()">Login / Signup</button>
 <div id="msg"></div>
 </div>
 
@@ -86,10 +86,10 @@ small{color:#555;}
 <div class="card hide" id="appBox">
 <h2>👑 Quantum Item Finder</h2>
 <div class="user" id="userEmail"></div>
-<small id="locationTxt">📍 Detecting location…</small>
+<small id="locationTxt">📍 Any Area (Auto)</small>
 
 <select id="area">
-<option value="">Any Area (Auto)</option>
+<option value="Auto">Any Area (Auto)</option>
 <option>Anna Nagar</option>
 <option>T Nagar</option>
 <option>Velachery</option>
@@ -97,7 +97,6 @@ small{color:#555;}
 <option>Tambaram</option>
 <option>OMR</option>
 <option>Porur</option>
-<option>Guindy</option>
 </select>
 
 <input id="item" placeholder="Search item (rice, charger, tablet…)">
@@ -109,21 +108,19 @@ small{color:#555;}
 </div>
 
 <script>
-// 🔥 FIREBASE
+// FIREBASE
 firebase.initializeApp({
  apiKey:"AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
  authDomain:"quantum-item-finder.firebaseapp.com"
 });
 const auth=firebase.auth();
 
-// AUTH
-function signup(){
- auth.createUserWithEmailAndPassword(email.value,password.value)
- .catch(e=>msg.innerHTML=e.message);
-}
 function login(){
  auth.signInWithEmailAndPassword(email.value,password.value)
- .catch(e=>msg.innerHTML=e.message);
+ .catch(()=>{
+  auth.createUserWithEmailAndPassword(email.value,password.value)
+  .catch(e=>msg.innerHTML=e.message);
+ });
 }
 function logout(){auth.signOut();}
 
@@ -132,46 +129,49 @@ auth.onAuthStateChanged(u=>{
   loginBox.classList.add("hide");
   appBox.classList.remove("hide");
   userEmail.innerText="User: "+u.email;
-  detectLocation();
  }else{
   loginBox.classList.remove("hide");
   appBox.classList.add("hide");
  }
 });
 
-// 🌍 AUTO LOCATION (CHENNAI SAFE)
-function detectLocation(){
- if(navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(pos=>{
-   locationTxt.innerText="📍 Location detected (Chennai)";
-  },()=>{
-   locationTxt.innerText="📍 Location permission denied";
-  });
- }else{
-  locationTxt.innerText="📍 Location not supported";
- }
-}
+// 🏪 STORE DATABASE (SAMPLE – EXTENDABLE)
+const stores=[
+ {name:"Sri Lakshmi Stores",area:"Anna Nagar",type:"grocery"},
+ {name:"Reliance Smart",area:"T Nagar",type:"grocery"},
+ {name:"Apollo Pharmacy",area:"Adyar",type:"medical"},
+ {name:"Vasanth & Co",area:"Velachery",type:"electronics"},
+ {name:"Sathya Stationery",area:"Tambaram",type:"stationery"},
+ {name:"More Supermarket",area:"Porur",type:"grocery"},
+];
 
-// 🏪 UNIVERSAL SHOP ENGINE (NO BREAK)
+// 🔍 SEARCH ENGINE
 function searchItem(){
- let itemName=item.value.toLowerCase().trim();
- let areaName=area.value || "Nearby Area";
+ let q=item.value.toLowerCase().trim();
+ let a=area.value;
+ result.innerHTML="";
 
- if(!itemName){
-  result.innerHTML="❌ Enter item name";
-  return;
+ if(!q){result.innerHTML="❌ Enter item name";return;}
+
+ let found=stores.filter(s=>(a==="Auto"||s.area===a));
+
+ found.forEach(s=>{
+  result.innerHTML+=`
+  <div class="shop">
+   <b>${s.name}</b><br>
+   🏪 ${s.type} store<br>
+   📍 ${s.area}, Chennai
+   <div class="actions">
+    <button class="map" onclick="window.open('https://maps.google.com?q=${s.area} ${s.name}')">🗺 Map</button>
+    <button class="call" onclick="alert('Calling ${s.name}…')">📞 Call</button>
+    <button class="book" onclick="alert('Pre-booked at ${s.name}')">📦 Book</button>
+   </div>
+  </div>`;
+ });
+
+ if(found.length===0){
+  result.innerHTML="❌ No stores found in this area";
  }
-
- result.innerHTML=`
- <div class="shop">
-  <b>${itemName.toUpperCase()} available</b><br>
-  📍 ${areaName}, Chennai
-  <div class="actions">
-   <button onclick="window.open('https://maps.google.com')">🗺 Map</button>
-   <button onclick="alert('Calling nearby shop…')">📞 Call</button>
-   <button onclick="alert('Pre-booking successful')">📦 Book</button>
-  </div>
- </div>`;
 }
 </script>
 
