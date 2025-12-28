@@ -5,85 +5,75 @@
 <title>Quantum Item Finder</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#f3f4f6,#e5e7eb);
 }
 .card{
-  max-width:420px;
-  margin:40px auto;
+  max-width:430px;
+  margin:30px auto;
   background:#fff;
-  padding:24px;
+  padding:22px;
   border-radius:18px;
-  box-shadow:0 15px 35px rgba(0,0,0,.12);
+  box-shadow:0 18px 40px rgba(0,0,0,.15);
 }
 h2{
   text-align:center;
   color:#1B5E20;
-  margin-bottom:10px;
 }
 .user{
   text-align:center;
   font-size:14px;
-  color:#555;
-  margin-bottom:15px;
+  margin-bottom:12px;
 }
-input{
+select,input{
   width:100%;
   padding:14px;
+  margin-bottom:12px;
   border-radius:10px;
   border:1px solid #ddd;
-  margin-bottom:14px;
-  font-size:15px;
-}
-input:focus{
-  outline:none;
-  border-color:#1B5E20;
 }
 button{
   width:100%;
   padding:14px;
   border:none;
   border-radius:12px;
-  font-size:16px;
+  font-size:15px;
   font-weight:600;
-  cursor:pointer;
   margin-bottom:10px;
+  cursor:pointer;
 }
-.btn-main{
+.primary{
   background:linear-gradient(135deg,#1B5E20,#2E7D32);
   color:#fff;
 }
-.btn-gold{
+.gold{
   background:linear-gradient(135deg,#C9A227,#E6C75A);
 }
-.btn-red{
+.red{
   background:#B71C1C;
   color:#fff;
 }
-.result{
-  margin-top:15px;
-  background:#f8f9fa;
-  padding:15px;
-  border-radius:12px;
+.shop{
+  background:#f9fafb;
+  padding:14px;
+  border-radius:14px;
+  margin-top:12px;
   border-left:5px solid #1B5E20;
 }
-.msg{
-  text-align:center;
-  margin-top:10px;
-  font-weight:500;
+.shop b{color:#1B5E20;}
+.actions button{
+  width:32%;
+  font-size:13px;
+  padding:10px;
 }
-.success{color:#2E7D32;}
-.error{color:#B71C1C;}
 .hide{display:none;}
 </style>
 </head>
@@ -95,9 +85,9 @@ button{
   <h2>🔐 Login / Signup</h2>
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
-  <button class="btn-main" onclick="signup()">Signup</button>
-  <button class="btn-gold" onclick="login()">Login</button>
-  <div id="loginMsg" class="msg"></div>
+  <button class="primary" onclick="signup()">Signup</button>
+  <button class="gold" onclick="login()">Login</button>
+  <div id="msg"></div>
 </div>
 
 <!-- APP -->
@@ -105,67 +95,89 @@ button{
   <h2>🔍 Quantum Item Finder</h2>
   <div class="user" id="userEmail"></div>
 
-  <input type="text" id="itemInput" placeholder="Search item (rice, tablet, charger...)">
-  <button class="btn-main" onclick="searchItem()">Search</button>
+  <!-- AREA SELECT -->
+  <select id="area">
+    <option value="">📍 Select Area</option>
+    <option>Anna Nagar</option>
+    <option>T Nagar</option>
+    <option>Velachery</option>
+    <option>Adyar</option>
+  </select>
+
+  <!-- ITEM SEARCH -->
+  <input type="text" id="item" placeholder="Search item (rice, tablet, charger)">
+  <button class="primary" onclick="search()">Search</button>
 
   <div id="result"></div>
 
-  <button class="btn-red" onclick="logout()">Logout</button>
+  <button class="red" onclick="logout()">Logout</button>
 </div>
 
 <script>
-// 🔥 Firebase Config (UN config correct ah iruku)
-const firebaseConfig = {
-  apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
-  authDomain: "quantum-item-finder.firebaseapp.com",
-  projectId: "quantum-item-finder",
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// 🔥 Firebase
+firebase.initializeApp({
+  apiKey:"AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
+  authDomain:"quantum-item-finder.firebaseapp.com",
+});
+const auth=firebase.auth();
 
-// 🔐 AUTH FUNCTIONS
+// 🔐 AUTH
 function signup(){
-  auth.createUserWithEmailAndPassword(
-    email.value, password.value
-  ).then(()=>loginMsg.innerHTML="<span class='success'>Signup success</span>")
-  .catch(e=>loginMsg.innerHTML="<span class='error'>"+e.message+"</span>");
+ auth.createUserWithEmailAndPassword(email.value,password.value)
+ .catch(e=>msg.innerHTML=e.message);
 }
-
 function login(){
-  auth.signInWithEmailAndPassword(
-    email.value, password.value
-  ).catch(e=>loginMsg.innerHTML="<span class='error'>"+e.message+"</span>");
+ auth.signInWithEmailAndPassword(email.value,password.value)
+ .catch(e=>msg.innerHTML=e.message);
 }
+function logout(){auth.signOut();}
 
-function logout(){
-  auth.signOut();
-}
-
-// 🔄 AUTH STATE
-auth.onAuthStateChanged(user=>{
-  if(user){
-    loginBox.classList.add("hide");
-    appBox.classList.remove("hide");
-    userEmail.innerText="User: "+user.email;
-  }else{
-    loginBox.classList.remove("hide");
-    appBox.classList.add("hide");
-  }
+auth.onAuthStateChanged(u=>{
+ if(u){
+  loginBox.classList.add("hide");
+  appBox.classList.remove("hide");
+  userEmail.innerText="User: "+u.email;
+ }else{
+  loginBox.classList.remove("hide");
+  appBox.classList.add("hide");
+ }
 });
 
-// 🔎 SEARCH LOGIC
-const data={
-  rice:"Available at Anna Nagar Grocery Store",
-  tablet:"Available at T Nagar Electronics",
-  charger:"Available at Velachery Mobile Shop",
-  pen:"Available at Stationery Shop – Adyar"
+// 🏪 DATA
+const shops={
+ rice:[
+  {name:"Sri Lakshmi Stores",area:"Anna Nagar",phone:"9876543210",map:"https://maps.google.com?q=Anna+Nagar"},
+  {name:"Fresh Mart",area:"T Nagar",phone:"9123456780",map:"https://maps.google.com?q=T+Nagar"}
+ ],
+ charger:[
+  {name:"Mobile World",area:"Velachery",phone:"9000001111",map:"https://maps.google.com?q=Velachery"}
+ ]
 };
 
-function searchItem(){
-  let item=itemInput.value.toLowerCase();
-  result.innerHTML = data[item]
-    ? `<div class="result">✅ ${data[item]}</div>`
-    : `<div class="result">❌ Item not found</div>`;
+// 🔍 SEARCH
+function search(){
+ let it=item.value.toLowerCase();
+ let ar=area.value;
+ let out="";
+ if(!shops[it]){
+  result.innerHTML="❌ Item not found";
+  return;
+ }
+ shops[it].forEach(s=>{
+  if(!ar || s.area===ar){
+   out+=`
+   <div class="shop">
+    <b>${s.name}</b><br>
+    📍 ${s.area}<br>
+    <div class="actions">
+     <button onclick="window.open('${s.map}')">🗺 Map</button>
+     <button onclick="location.href='tel:${s.phone}'">📞 Call</button>
+     <button onclick="alert('Pre-Booked successfully')">📦 Pre-Book</button>
+    </div>
+   </div>`;
+  }
+ });
+ result.innerHTML=out || "❌ No shops in this area";
 }
 </script>
 
