@@ -1,178 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Quantum Item Finder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Quantum Item Finder</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<style>
-body{
- margin:0;
- font-family:Poppins,sans-serif;
- background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-}
-.card{
- max-width:430px;
- margin:20px auto;
- background:#fff;
- padding:22px;
- border-radius:22px;
- box-shadow:0 25px 60px rgba(0,0,0,.45);
-}
-h2{text-align:center;color:#0f2027;}
-.user{text-align:center;font-size:14px;color:#555;}
-input,select{
- width:100%;
- padding:14px;
- margin-bottom:12px;
- border-radius:14px;
- border:1px solid #ccc;
- font-size:14px;
-}
-button{
- width:100%;
- padding:14px;
- border:none;
- border-radius:16px;
- font-weight:600;
- margin-bottom:10px;
- cursor:pointer;
-}
-.search{background:linear-gradient(135deg,#396afc,#2948ff);color:#fff;}
-.logout{background:#b71c1c;color:#fff;}
-.shop{
- background:#f4f6f8;
- padding:14px;
- border-radius:16px;
- margin-top:14px;
- border-left:6px solid #396afc;
-}
-.shop b{color:#396afc;}
-.actions{
- display:flex;
- gap:8px;
- margin-top:10px;
-}
-.actions button{
- flex:1;
- padding:10px;
- font-size:13px;
- border-radius:12px;
-}
-.map{background:#2e7d32;color:#fff;}
-.call{background:#f9a825;color:#000;}
-.book{background:#6a1b9a;color:#fff;}
-.hide{display:none;}
-small{color:#777;}
-</style>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      min-height: 100vh;
+      color: white;
+    }
+
+    .card {
+      max-width: 420px;
+      margin: 30px auto;
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.3);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .search {
+      background: linear-gradient(to right,#4776e6,#8e54e9);
+      color: white;
+    }
+
+    .logout {
+      background: #b33939;
+      color: white;
+    }
+
+    .shop {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,.15);
+    }
+
+    .shop h3 {
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .call {
+      background: #27ae60;
+      color: white;
+    }
+
+    .map {
+      background: #2980b9;
+      color: white;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div class="card" id="loginBox">
-<h2>🔐 Login / Signup</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button class="search" onclick="login()">Login / Signup</button>
-<div id="msg"></div>
-</div>
+<div class="card">
+  <h2>👑 Quantum Item Finder</h2>
+  <p id="user"></p>
 
-<!-- APP -->
-<div class="card hide" id="appBox">
-<h2>👑 Quantum Item Finder</h2>
-<div class="user" id="userEmail"></div>
-<small id="locationTxt">📍 Any Area (Auto)</small>
+  <select id="area">
+    <option value="">Any Area</option>
+    <option>T Nagar</option>
+    <option>Velachery</option>
+    <option>Anna Nagar</option>
+    <option>Tambaram</option>
+  </select>
 
-<select id="area">
-<option value="Auto">Any Area (Auto)</option>
-<option>Anna Nagar</option>
-<option>T Nagar</option>
-<option>Velachery</option>
-<option>Adyar</option>
-<option>Tambaram</option>
-<option>OMR</option>
-<option>Porur</option>
-</select>
+  <input id="item" placeholder="Search item (rice, sugar...)" />
+  <button class="search" onclick="search()">Search</button>
 
-<input id="item" placeholder="Search item (rice, charger, tablet…)">
-<button class="search" onclick="searchItem()">Search</button>
+  <div id="results"></div>
 
-<div id="result"></div>
-
-<button class="logout" onclick="logout()">Logout</button>
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
-// FIREBASE
-firebase.initializeApp({
- apiKey:"AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
- authDomain:"quantum-item-finder.firebaseapp.com"
-});
-const auth=firebase.auth();
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID"
+  };
 
-function login(){
- auth.signInWithEmailAndPassword(email.value,password.value)
- .catch(()=>{
-  auth.createUserWithEmailAndPassword(email.value,password.value)
-  .catch(e=>msg.innerHTML=e.message);
- });
-}
-function logout(){auth.signOut();}
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-auth.onAuthStateChanged(u=>{
- if(u){
-  loginBox.classList.add("hide");
-  appBox.classList.remove("hide");
-  userEmail.innerText="User: "+u.email;
- }else{
-  loginBox.classList.remove("hide");
-  appBox.classList.add("hide");
- }
-});
+  auth.onAuthStateChanged(user => {
+    if (!user) location.href = "index.html";
+    document.getElementById("user").innerText = "User: " + user.email;
+  });
 
-// 🏪 STORE DATABASE (SAMPLE – EXTENDABLE)
-const stores=[
- {name:"Sri Lakshmi Stores",area:"Anna Nagar",type:"grocery"},
- {name:"Reliance Smart",area:"T Nagar",type:"grocery"},
- {name:"Apollo Pharmacy",area:"Adyar",type:"medical"},
- {name:"Vasanth & Co",area:"Velachery",type:"electronics"},
- {name:"Sathya Stationery",area:"Tambaram",type:"stationery"},
- {name:"More Supermarket",area:"Porur",type:"grocery"},
-];
+  function logout() {
+    auth.signOut();
+  }
 
-// 🔍 SEARCH ENGINE
-function searchItem(){
- let q=item.value.toLowerCase().trim();
- let a=area.value;
- result.innerHTML="";
+  async function search() {
+    const item = document.getElementById("item").value.toLowerCase();
+    const area = document.getElementById("area").value;
+    const box = document.getElementById("results");
+    box.innerHTML = "Searching...";
 
- if(!q){result.innerHTML="❌ Enter item name";return;}
+    let q = db.collection("shops")
+      .where("items", "array-contains", item);
 
- let found=stores.filter(s=>(a==="Auto"||s.area===a));
+    if (area) q = q.where("area", "==", area);
 
- found.forEach(s=>{
-  result.innerHTML+=`
-  <div class="shop">
-   <b>${s.name}</b><br>
-   🏪 ${s.type} store<br>
-   📍 ${s.area}, Chennai
-   <div class="actions">
-    <button class="map" onclick="window.open('https://maps.google.com?q=${s.area} ${s.name}')">🗺 Map</button>
-    <button class="call" onclick="alert('Calling ${s.name}…')">📞 Call</button>
-    <button class="book" onclick="alert('Pre-booked at ${s.name}')">📦 Book</button>
-   </div>
-  </div>`;
- });
+    const snap = await q.get();
+    box.innerHTML = "";
 
- if(found.length===0){
-  result.innerHTML="❌ No stores found in this area";
- }
-}
+    if (snap.empty) {
+      box.innerHTML = "❌ No shops found";
+      return;
+    }
+
+    snap.forEach(doc => {
+      const s = doc.data();
+      box.innerHTML += `
+        <div class="shop">
+          <h3>${s.name}</h3>
+          <p>📍 ${s.area}, ${s.city}</p>
+          <div class="actions">
+            <button class="call" onclick="call('${s.phone}')">Call</button>
+            <button class="map" onclick="map(${s.lat},${s.lng})">Map</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function call(num) {
+    location.href = "tel:" + num;
+  }
+
+  function map(lat,lng) {
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+  }
 </script>
 
 </body>
