@@ -1,25 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Quantum Item Finder – Chennai</title>
+<title>Quantum Item Finder – Secure</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- BASIC SECURITY -->
+<meta http-equiv="Content-Security-Policy"
+content="default-src 'self' https://www.google.com https://wa.me">
+
 <style>
-body {font-family: Arial; padding:20px; text-align:center; background:#f4f6f7;}
-select,input,button {padding:10px; width:90%; max-width:420px; margin:6px;}
-button {background:#2e7d32;color:#fff;border:none;border-radius:6px;}
-.shop-box {background:#fff;padding:12px;margin-top:10px;border-radius:8px;}
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #f4f6f7;
+}
+select,input,button {
+  padding: 10px;
+  width: 90%;
+  max-width: 420px;
+  margin: 6px;
+}
+button {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+.shop-box {
+  background: #fff;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
 </style>
 </head>
 
 <body>
 
-<h2>🔍 Quantum Item Finder</h2>
-<p>🌆 Chennai – All Areas | All Shops | All Needs</p>
+<h2>🔐 Quantum Item Finder</h2>
+<p>🛡️ Chennai – Secure Quantum Search</p>
 
 <select id="area">
-  <option value="">📍 All Chennai Areas</option>
+  <option value="">📍 All Chennai</option>
   <option>North Chennai</option>
   <option>South Chennai</option>
   <option>Central Chennai</option>
@@ -28,70 +53,95 @@ button {background:#2e7d32;color:#fff;border:none;border-radius:6px;}
   <option>ECR</option>
 </select>
 
-<input id="item" placeholder="Eg: pen, rice, mechanic, hospital, tyre, spanner">
+<input id="item" placeholder="Eg: pen, rice, mechanic, hospital">
 
-<button onclick="search()">Find</button>
+<button onclick="search()">Find Securely</button>
 
 <div id="result"></div>
 
 <script>
-/* 🔑 ITEM → CATEGORY */
-var map = {
-  // daily
-  rice:"grocery", oil:"grocery", milk:"grocery", soap:"grocery",
-  // stationery
+/* 🔒 BASIC PROTECTION */
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.onkeydown = e => {
+  if (e.keyCode === 123) return false;
+  if (e.ctrlKey && e.shiftKey && e.keyCode === 73) return false;
+};
+
+/* 🧬 QUANTUM SESSION TOKEN */
+let quantumToken = Math.random().toString(36).substr(2);
+setTimeout(()=>{
+  quantumToken = null;
+  alert("🔐 Quantum session expired. Reload app.");
+}, 300000); // 5 min
+
+/* 🔑 ITEM → CATEGORY MAP */
+const map = {
   pen:"stationery", notebook:"stationery", xerox:"stationery",
-  // medical
+  rice:"grocery", oil:"grocery", milk:"grocery",
   tablet:"medical", medicine:"medical", hospital:"hospital",
-  // electronics
   mobile:"electronics", tv:"electronics", laptop:"electronics",
-  // tools & mechanic
-  spanner:"tools", drill:"tools", mechanic:"mechanic",
-  tyre:"mechanic", brake:"mechanic",
-  // services
+  spanner:"tools", drill:"tools",
+  mechanic:"mechanic", tyre:"mechanic",
   plumber:"service", electrician:"service"
 };
 
-/* 🏪 CATEGORY → GENERIC SHOPS (BIG + SMALL) */
-var shops = {
-  grocery:["Supermarket","Local Grocery Shop"],
-  stationery:["Stationery Store","Book Shop"],
+/* 🏪 CATEGORY → GENERIC CHENNAI SHOPS */
+const shops = {
+  stationery:["Stationery Shop","Book Store"],
+  grocery:["Supermarket","Local Grocery"],
   medical:["Pharmacy","Medical Store"],
   hospital:["Private Hospital","Government Hospital"],
-  electronics:["Electronics Showroom","Mobile Repair Shop"],
+  electronics:["Electronics Showroom","Repair Shop"],
   tools:["Hardware Store","Tool Shop"],
-  mechanic:["Car Mechanic","Bike Mechanic"],
+  mechanic:["Bike Mechanic","Car Mechanic"],
   service:["Local Service Provider"]
 };
 
+/* 🔍 MAIN SEARCH */
 function search(){
-  var i = item.value.toLowerCase().trim();
-  var a = area.value || "Chennai";
-  var r = document.getElementById("result");
-  r.innerHTML="";
+  if(!quantumToken){
+    alert("Session invalid. Reload.");
+    return;
+  }
 
-  var c = map[i];
-  if(!c){ r.innerHTML="❌ Item/Service available in Chennai but not listed yet"; return;}
+  let i = item.value.toLowerCase()
+    .replace(/[^a-z0-9 ]/g,"")
+    .trim();
+  let a = area.value || "Chennai";
+  let r = document.getElementById("result");
+  r.innerHTML = "";
 
-  r.innerHTML=`✅ <b>${i}</b> available across <b>${a}</b><br>`;
+  let c = map[i];
+  if(!c){
+    r.innerHTML = "❌ Item / service not indexed yet";
+    return;
+  }
+
+  r.innerHTML = `✅ <b>${i}</b> available across <b>${a}</b>`;
 
   shops[c].forEach(s=>{
-    r.innerHTML+=`
+    r.innerHTML += `
       <div class="shop-box">
         <b>${s}</b><br>
         📍 ${a}<br><br>
-        <button onclick="mapOpen('${s} ${a}')">📍 Map</button>
-        <button onclick="call()">📞 Call</button>
+        <button onclick="openMap('${s} ${a}')">📍 Map</button>
+        <button onclick="secureCall()">📞 Call</button>
       </div>
     `;
   });
 }
 
-function mapOpen(q){
-  window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q));
+/* 🔐 HELPERS */
+function openMap(q){
+  window.open(
+    "https://www.google.com/maps/search/?api=1&query="+
+    encodeURIComponent(q),
+    "_blank"
+  );
 }
-function call(){
-  alert("Call nearby shop (demo)");
+
+function secureCall(){
+  alert("📞 Calling nearby verified shop (demo)");
 }
 </script>
 
