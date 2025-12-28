@@ -1,154 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Quantum Item Finder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f7;
-  margin:0;
-}
-.container{
-  max-width:420px;
-  margin:40px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,.1);
-}
-h2{text-align:center}
-input,button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-}
-button{
-  background:#2e7d32;
-  color:#fff;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
-.hidden{display:none}
-.shop{
-  border:1px solid #ddd;
-  padding:10px;
-  margin-top:10px;
-  border-radius:6px;
-}
-.logout{
-  background:#c62828;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Quantum Item Finder – Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+<body style="font-family: Arial; text-align:center; padding:30px">
 
-<body>
+  <h2>🔐 Login / Signup</h2>
 
-<!-- 🔐 LOGIN PAGE -->
-<div class="container" id="loginBox">
-  <h2>🔐 Login</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Login / Signup</button>
-</div>
+  <input id="email" type="email" placeholder="Email" style="width:90%;padding:10px"><br><br>
+  <input id="password" type="password" placeholder="Password (min 6 chars)" style="width:90%;padding:10px"><br><br>
 
-<!-- 🛒 APP PAGE -->
-<div class="container hidden" id="appBox">
-  <h2>🔍 Quantum Item Finder</h2>
-  <p>Area: Tambaram</p>
+  <button onclick="loginOrSignup()" style="padding:10px 30px">
+    Login / Signup
+  </button>
 
-  <input id="itemInput" placeholder="Enter item (mobile, pen, book)">
-  <button onclick="findItem()">Find Item</button>
+  <p id="msg"></p>
 
-  <div id="result"></div>
+  <!-- 🔥 FIREBASE FULL SETUP -->
+  <script type="module">
 
-  <button class="logout" onclick="logout()">Logout</button>
-</div>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<!-- 🔥 FIREBASE SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    // ✅ YOUR FIREBASE CONFIG (correct one)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
+      authDomain: "quantum-item-finder.firebaseapp.com",
+      projectId: "quantum-item-finder",
+      appId: "1:855232416132:web:d10e2669d548477c0a75d1"
+    };
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
-  authDomain: "quantum-item-finder.firebaseapp.com",
-  projectId: "quantum-item-finder",
-  appId: "1:855232416132:web:d10e2669d548477c0a75d1"
-};
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+    // 👇 GLOBAL FUNCTION (IMPORTANT)
+    window.loginOrSignup = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("msg");
 
-/* 🔐 AUTH CHECK */
-auth.onAuthStateChanged(user=>{
-  if(user){
-    loginBox.classList.add("hidden");
-    appBox.classList.remove("hidden");
-  }else{
-    loginBox.classList.remove("hidden");
-    appBox.classList.add("hidden");
-  }
-});
+      if (!email || !password) {
+        msg.innerText = "❌ Email & password required";
+        return;
+      }
 
-/* 🔐 LOGIN / SIGNUP */
-function login(){
-  const email=email.value;
-  const pass=password.value;
-
-  auth.signInWithEmailAndPassword(email,pass)
-  .catch(()=>{
-    return auth.createUserWithEmailAndPassword(email,pass);
-  })
-  .catch(e=>alert(e.message));
-}
-
-/* 🚪 LOGOUT */
-function logout(){
-  auth.signOut();
-}
-
-/* 🛒 DATA */
-const shops={
-  mobile:{name:"Sri Mobiles",area:"Tambaram East",phone:"919876543210"},
-  pen:{name:"Lakshmi Stationery",area:"Tambaram West",phone:"919812345678"},
-  book:{name:"New Book World",area:"Tambaram",phone:"919800112233"}
-};
-
-/* 🔍 FIND ITEM */
-function findItem(){
-  const item=itemInput.value.toLowerCase();
-  const r=result;
-  r.innerHTML="";
-
-  if(shops[item]){
-    const s=shops[item];
-    r.innerHTML=`
-      <div class="shop">
-        <b>${s.name}</b><br>
-        📍 ${s.area}<br><br>
-        <button onclick="call('${s.phone}')">📞 Call</button><br><br>
-        <button onclick="whatsapp('${item}','${s.phone}')">💬 WhatsApp</button>
-      </div>`;
-  }else{
-    r.innerHTML="❌ Item not found";
-  }
-}
-
-/* 📞 CALL */
-function call(p){
-  location.href="tel:"+p;
-}
-
-/* 💬 WHATSAPP */
-function whatsapp(item,phone){
-  const msg=`Hi, I want ${item} in Tambaram`;
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-}
-</script>
+      try {
+        // 🔹 TRY LOGIN
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.innerText = "✅ Login success";
+      } catch (loginErr) {
+        try {
+          // 🔹 IF LOGIN FAIL → SIGNUP
+          await createUserWithEmailAndPassword(auth, email, password);
+          msg.innerText = "✅ Signup success";
+        } catch (signupErr) {
+          msg.innerText = "❌ " + signupErr.message;
+        }
+      }
+    };
+  </script>
 
 </body>
 </html>
