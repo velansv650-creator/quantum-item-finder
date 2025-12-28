@@ -2,59 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Quantum Item Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quantum Item Finder – Secure Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background:#f4f6f8; }
-    .box { background:#fff; padding:20px; margin:20px auto; width:90%; max-width:400px; border-radius:10px; }
-    input, button { width:90%; padding:10px; margin:8px 0; }
-    button { background:#2e7d32; color:#fff; border:none; border-radius:5px; }
-    #app { display:none; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: #fff;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 6px;
+      background: #2e7d32;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1b5e20;
+    }
+    .hide {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- 🔐 LOGIN BOX -->
-<div class="box" id="loginBox">
+<div class="box">
   <h2>🔐 Login</h2>
 
-  <input id="email" placeholder="Email">
+  <!-- EMAIL LOGIN -->
+  <input id="email" type="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
   <button onclick="emailLogin()">Login / Signup</button>
 
   <hr>
 
-  <input id="phone" placeholder="+91xxxxxxxxxx">
+  <!-- PHONE LOGIN -->
+  <input id="phone" placeholder="+91XXXXXXXXXX">
+  <div id="recaptcha-container"></div>
   <button onclick="sendOTP()">Send OTP</button>
 
   <input id="otp" placeholder="Enter OTP">
   <button onclick="verifyOTP()">Verify OTP</button>
-
-  <div id="recaptcha"></div>
 </div>
 
-<!-- 🛒 APP -->
-<div class="box" id="app">
-  <h2>🔍 Quantum Item Finder</h2>
-  <p>Welcome! Login success ✅</p>
-  <input id="itemInput" placeholder="Search item">
-  <button onclick="alert('Item search logic here')">Find Item</button>
-  <br><br>
-  <button onclick="logout()">Logout</button>
-</div>
-
-<!-- 🔥 FIREBASE -->
+<!-- 🔥 FIREBASE FULL SETUP -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth,
-           signInWithEmailAndPassword,
-           createUserWithEmailAndPassword,
-           RecaptchaVerifier,
-           signInWithPhoneNumber,
-           onAuthStateChanged,
-           signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    RecaptchaVerifier,
+    signInWithPhoneNumber
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+  // 🔑 YOUR FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
     authDomain: "quantum-item-finder.firebaseapp.com",
@@ -67,42 +98,56 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // EMAIL LOGIN
-  window.emailLogin = async () => {
-    const email = email.value;
-    const password = password.value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch {
-      await createUserWithEmailAndPassword(auth, email, password);
-    }
+  // expose globally
+  window.auth = auth;
+  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  window.RecaptchaVerifier = RecaptchaVerifier;
+  window.signInWithPhoneNumber = signInWithPhoneNumber;
+
+  // 🔐 EMAIL LOGIN / SIGNUP
+  window.emailLogin = function () {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        alert("✅ Email Login Success");
+      })
+      .catch(() => {
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => alert("✅ Account Created & Logged In"))
+          .catch(err => alert(err.message));
+      });
   };
 
-  // PHONE OTP
-  window.sendOTP = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
-      size: "invisible"
-    });
-    signInWithPhoneNumber(auth, phone.value, window.recaptchaVerifier)
-      .then(r => window.confirmationResult = r);
+  // 🔐 PHONE OTP
+  let confirmationResult;
+
+  window.onload = () => {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      'recaptcha-container',
+      { size: 'invisible' },
+      auth
+    );
   };
 
-  window.verifyOTP = () => {
-    confirmationResult.confirm(otp.value);
+  window.sendOTP = function () {
+    const phone = document.getElementById("phone").value;
+    signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+      .then(result => {
+        confirmationResult = result;
+        alert("📨 OTP Sent");
+      })
+      .catch(err => alert(err.message));
   };
 
-  // AUTH STATE
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      loginBox.style.display = "none";
-      app.style.display = "block";
-    } else {
-      loginBox.style.display = "block";
-      app.style.display = "none";
-    }
-  });
-
-  window.logout = () => signOut(auth);
+  window.verifyOTP = function () {
+    const otp = document.getElementById("otp").value;
+    confirmationResult.confirm(otp)
+      .then(() => alert("✅ Phone Login Success"))
+      .catch(err => alert(err.message));
+  };
 </script>
 
 </body>
