@@ -1,138 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quantum Item Finder - Login</title>
+  <meta charset="UTF-8">
+  <title>Quantum Item Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // 🔐 YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
+      authDomain: "quantum-item-finder.firebaseapp.com",
+      projectId: "quantum-item-finder",
+      storageBucket: "quantum-item-finder.appspot.com",
+      messagingSenderId: "855232416132",
+      appId: "1:855232416132:web:d10e2669d548477c0a75d1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Elements
+    const loginBox = document.getElementById("loginBox");
+    const appBox = document.getElementById("appBox");
+    const msg = document.getElementById("msg");
+
+    // Auth state
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        loginBox.style.display = "none";
+        appBox.style.display = "block";
+        document.getElementById("userEmail").innerText = user.email;
+      } else {
+        loginBox.style.display = "block";
+        appBox.style.display = "none";
+      }
+    });
+
+    // Signup
+    window.signup = () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          msg.innerHTML = "✅ Signup successful!";
+          msg.style.color = "green";
+        })
+        .catch(err => {
+          msg.innerHTML = err.message;
+          msg.style.color = "red";
+        });
+    };
+
+    // Login
+    window.login = () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          msg.innerHTML = "✅ Login successful!";
+          msg.style.color = "green";
+        })
+        .catch(err => {
+          msg.innerHTML = err.message;
+          msg.style.color = "red";
+        });
+    };
+
+    // Logout
+    window.logout = () => {
+      signOut(auth);
+    };
+  </script>
 
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #e9f5e9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      font-family: Arial;
+      background: #f4f4f4;
     }
-    .card {
+    .box {
+      max-width: 350px;
+      margin: 60px auto;
       background: white;
       padding: 25px;
       border-radius: 10px;
-      width: 320px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
       text-align: center;
     }
-    h2 { margin-bottom: 15px; }
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
-      margin: 8px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      margin-top: 10px;
+      font-size: 16px;
     }
     button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 5px;
       background: #2e7d32;
       color: white;
-      font-size: 16px;
-      cursor: pointer;
+      border: none;
+      border-radius: 5px;
     }
-    button:hover { background: #256428; }
-    .msg {
-      margin-top: 10px;
-      font-size: 14px;
+    .logout {
+      background: #c62828;
     }
-    .success { color: green; }
-    .error { color: red; }
   </style>
 </head>
 
 <body>
 
-<div class="card">
+<!-- 🔐 LOGIN / SIGNUP -->
+<div class="box" id="loginBox">
   <h2>🔐 Login / Signup</h2>
-
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-
+  <input id="emailInput" type="email" placeholder="Email">
+  <input id="passwordInput" type="password" placeholder="Password">
   <button onclick="signup()">Signup</button>
   <button onclick="login()">Login</button>
-
-  <div id="message" class="msg"></div>
+  <p id="msg"></p>
 </div>
 
-<!-- FIREBASE -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-  // 🔥 YOUR FIREBASE CONFIG
-  const firebaseConfig = {
-    apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
-    authDomain: "quantum-item-finder.firebaseapp.com",
-    projectId: "quantum-item-finder",
-    storageBucket: "quantum-item-finder.appspot.com",
-    messagingSenderId: "855232416132",
-    appId: "1:855232416132:web:d10e2669d548477c0a75d1"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  window.signup = function () {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("message");
-
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        msg.innerHTML = "✅ Signup successful!";
-        msg.className = "msg success";
-      })
-      .catch(err => {
-        if (err.code === "auth/email-already-in-use") {
-          msg.innerHTML = "⚠️ Email already exists. Login pannunga.";
-        } else {
-          msg.innerHTML = err.message;
-        }
-        msg.className = "msg error";
-      });
-  };
-
-  window.login = function () {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("message");
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        msg.innerHTML = "✅ Login successful!";
-        msg.className = "msg success";
-        // 👉 after login redirect
-        // window.location.href = "home.html";
-      })
-      .catch(err => {
-        msg.innerHTML = err.message;
-        msg.className = "msg error";
-      });
-  };
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      console.log("Logged in:", user.email);
-    }
-  });
-</script>
+<!-- 🚀 APP INSIDE PAGE -->
+<div class="box" id="appBox" style="display:none;">
+  <h2>🎉 Welcome to Quantum Item Finder</h2>
+  <p>User: <b id="userEmail"></b></p>
+  <p>✅ App inside page loaded successfully</p>
+  <button class="logout" onclick="logout()">Logout</button>
+</div>
 
 </body>
 </html>
