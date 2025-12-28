@@ -1,148 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Quantum Item Finder – Secure</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Quantum Item Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- BASIC SECURITY -->
-<meta http-equiv="Content-Security-Policy"
-content="default-src 'self' https://www.google.com https://wa.me">
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 20px;
-  background: #f4f6f7;
-}
-select,input,button {
-  padding: 10px;
-  width: 90%;
-  max-width: 420px;
-  margin: 6px;
-}
-button {
-  background: #2e7d32;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-}
-.shop-box {
-  background: #fff;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.1);
-}
-</style>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background:#f4f6f8; }
+    .box { background:#fff; padding:20px; margin:20px auto; width:90%; max-width:400px; border-radius:10px; }
+    input, button { width:90%; padding:10px; margin:8px 0; }
+    button { background:#2e7d32; color:#fff; border:none; border-radius:5px; }
+    #app { display:none; }
+  </style>
 </head>
-
 <body>
 
-<h2>🔐 Quantum Item Finder</h2>
-<p>🛡️ Chennai – Secure Quantum Search</p>
+<!-- 🔐 LOGIN BOX -->
+<div class="box" id="loginBox">
+  <h2>🔐 Login</h2>
 
-<select id="area">
-  <option value="">📍 All Chennai</option>
-  <option>North Chennai</option>
-  <option>South Chennai</option>
-  <option>Central Chennai</option>
-  <option>West Chennai</option>
-  <option>OMR</option>
-  <option>ECR</option>
-</select>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="emailLogin()">Login / Signup</button>
 
-<input id="item" placeholder="Eg: pen, rice, mechanic, hospital">
+  <hr>
 
-<button onclick="search()">Find Securely</button>
+  <input id="phone" placeholder="+91xxxxxxxxxx">
+  <button onclick="sendOTP()">Send OTP</button>
 
-<div id="result"></div>
+  <input id="otp" placeholder="Enter OTP">
+  <button onclick="verifyOTP()">Verify OTP</button>
 
-<script>
-/* 🔒 BASIC PROTECTION */
-document.addEventListener("contextmenu", e => e.preventDefault());
-document.onkeydown = e => {
-  if (e.keyCode === 123) return false;
-  if (e.ctrlKey && e.shiftKey && e.keyCode === 73) return false;
-};
+  <div id="recaptcha"></div>
+</div>
 
-/* 🧬 QUANTUM SESSION TOKEN */
-let quantumToken = Math.random().toString(36).substr(2);
-setTimeout(()=>{
-  quantumToken = null;
-  alert("🔐 Quantum session expired. Reload app.");
-}, 300000); // 5 min
+<!-- 🛒 APP -->
+<div class="box" id="app">
+  <h2>🔍 Quantum Item Finder</h2>
+  <p>Welcome! Login success ✅</p>
+  <input id="itemInput" placeholder="Search item">
+  <button onclick="alert('Item search logic here')">Find Item</button>
+  <br><br>
+  <button onclick="logout()">Logout</button>
+</div>
 
-/* 🔑 ITEM → CATEGORY MAP */
-const map = {
-  pen:"stationery", notebook:"stationery", xerox:"stationery",
-  rice:"grocery", oil:"grocery", milk:"grocery",
-  tablet:"medical", medicine:"medical", hospital:"hospital",
-  mobile:"electronics", tv:"electronics", laptop:"electronics",
-  spanner:"tools", drill:"tools",
-  mechanic:"mechanic", tyre:"mechanic",
-  plumber:"service", electrician:"service"
-};
+<!-- 🔥 FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth,
+           signInWithEmailAndPassword,
+           createUserWithEmailAndPassword,
+           RecaptchaVerifier,
+           signInWithPhoneNumber,
+           onAuthStateChanged,
+           signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* 🏪 CATEGORY → GENERIC CHENNAI SHOPS */
-const shops = {
-  stationery:["Stationery Shop","Book Store"],
-  grocery:["Supermarket","Local Grocery"],
-  medical:["Pharmacy","Medical Store"],
-  hospital:["Private Hospital","Government Hospital"],
-  electronics:["Electronics Showroom","Repair Shop"],
-  tools:["Hardware Store","Tool Shop"],
-  mechanic:["Bike Mechanic","Car Mechanic"],
-  service:["Local Service Provider"]
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
+    authDomain: "quantum-item-finder.firebaseapp.com",
+    projectId: "quantum-item-finder",
+    storageBucket: "quantum-item-finder.appspot.com",
+    messagingSenderId: "855232416132",
+    appId: "1:855232416132:web:d10e2669d548477c0a75d1"
+  };
 
-/* 🔍 MAIN SEARCH */
-function search(){
-  if(!quantumToken){
-    alert("Session invalid. Reload.");
-    return;
-  }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-  let i = item.value.toLowerCase()
-    .replace(/[^a-z0-9 ]/g,"")
-    .trim();
-  let a = area.value || "Chennai";
-  let r = document.getElementById("result");
-  r.innerHTML = "";
+  // EMAIL LOGIN
+  window.emailLogin = async () => {
+    const email = email.value;
+    const password = password.value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch {
+      await createUserWithEmailAndPassword(auth, email, password);
+    }
+  };
 
-  let c = map[i];
-  if(!c){
-    r.innerHTML = "❌ Item / service not indexed yet";
-    return;
-  }
+  // PHONE OTP
+  window.sendOTP = () => {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", {
+      size: "invisible"
+    });
+    signInWithPhoneNumber(auth, phone.value, window.recaptchaVerifier)
+      .then(r => window.confirmationResult = r);
+  };
 
-  r.innerHTML = `✅ <b>${i}</b> available across <b>${a}</b>`;
+  window.verifyOTP = () => {
+    confirmationResult.confirm(otp.value);
+  };
 
-  shops[c].forEach(s=>{
-    r.innerHTML += `
-      <div class="shop-box">
-        <b>${s}</b><br>
-        📍 ${a}<br><br>
-        <button onclick="openMap('${s} ${a}')">📍 Map</button>
-        <button onclick="secureCall()">📞 Call</button>
-      </div>
-    `;
+  // AUTH STATE
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      loginBox.style.display = "none";
+      app.style.display = "block";
+    } else {
+      loginBox.style.display = "block";
+      app.style.display = "none";
+    }
   });
-}
 
-/* 🔐 HELPERS */
-function openMap(q){
-  window.open(
-    "https://www.google.com/maps/search/?api=1&query="+
-    encodeURIComponent(q),
-    "_blank"
-  );
-}
-
-function secureCall(){
-  alert("📞 Calling nearby verified shop (demo)");
-}
+  window.logout = () => signOut(auth);
 </script>
 
 </body>
