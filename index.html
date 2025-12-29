@@ -3,120 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <title>Quantum Item Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    body{
-      margin:0;
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      font-family:Arial, sans-serif;
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
     }
-    .card{
-      width:320px;
-      background:#fff;
-      padding:25px;
-      border-radius:12px;
-      box-shadow:0 15px 30px rgba(0,0,0,.3);
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.3);
     }
-    h2{
-      text-align:center;
-      margin-bottom:20px;
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    input{
-      width:100%;
-      padding:10px;
-      margin-bottom:12px;
-      border-radius:6px;
-      border:1px solid #ccc;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    button{
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:8px;
-      background:#1e3c72;
-      color:white;
-      font-size:16px;
-      cursor:pointer;
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #3f51b5;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
     }
-    button:hover{ background:#16325c; }
-    .msg{
-      margin-top:10px;
-      text-align:center;
-      color:green;
-      font-size:14px;
+    button:hover {
+      background: #2c3ea8;
+    }
+    #msg {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>🔐 Login / Signup</h2>
+  <div class="card">
+    <h2>🔐 Login / Signup</h2>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
 
-  <button onclick="login()">Login / Signup</button>
-  <div class="msg" id="msg"></div>
-</div>
+    <button onclick="loginOrSignup()">Login / Signup</button>
 
-<!-- 🔥 FIREBASE FULL SETUP -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, getDocs } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <div id="msg"></div>
+  </div>
 
-  // ✅ YOUR FIREBASE CONFIG (already correct)
-  const firebaseConfig = {
-    apiKey: "AIzaSyAhpOhD7IXWdFXXXXXXXX",
-    authDomain: "quantum-item-finder-ed616.firebaseapp.com",
-    projectId: "quantum-item-finder-ed616",
-    storageBucket: "quantum-item-finder-ed616.appspot.com",
-    messagingSenderId: "52600435970",
-    appId: "1:52600435970:web:2198d29e3cfadb0e677e1b"
-  };
+  <!-- 🔥 FIREBASE FULL FINAL SCRIPT -->
+  <script type="module">
+    // ✅ NEW Firebase CDN imports (OLD imports REMOVE pannirukkanum)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // Init
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    // ✅ YOUR REAL Firebase config (screenshot-la irundhu)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhpOhD7IXWdFXXXXXXXX",
+      authDomain: "quantum-item-finder-ed616.firebaseapp.com",
+      projectId: "quantum-item-finder-ed616",
+      storageBucket: "quantum-item-finder-ed616.appspot.com",
+      messagingSenderId: "52600435970",
+      appId: "1:52600435970:web:2198d29e3cfadb0e677e1b"
+    };
 
-  // ✅ LOGIN / SIGNUP
-  window.login = async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("msg");
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      msg.innerText = "Login success ✅";
-      loadShops();
-    } catch (e) {
-      if (e.code === "auth/user-not-found") {
-        await createUserWithEmailAndPassword(auth, email, password);
-        msg.innerText = "Signup success ✅";
-        loadShops();
-      } else {
-        msg.innerText = e.message;
+    // ✅ SINGLE button – Login OR Signup
+    window.loginOrSignup = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("msg");
+
+      msg.style.color = "black";
+      msg.innerText = "Please wait...";
+
+      try {
+        // 🔹 Try login
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.style.color = "green";
+        msg.innerText = "✅ Login successful";
+        console.log("Login success");
+
+      } catch (err) {
+        if (err.code === "auth/user-not-found") {
+          // 🔹 If not exists → Signup
+          try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            msg.style.color = "green";
+            msg.innerText = "🎉 Signup successful";
+            console.log("Signup success");
+          } catch (signupErr) {
+            msg.style.color = "red";
+            msg.innerText = signupErr.message;
+          }
+        } else {
+          msg.style.color = "red";
+          msg.innerText = err.message;
+        }
       }
-    }
-  };
-
-  // ✅ FIRESTORE READ (shops)
-  async function loadShops(){
-    const snap = await getDocs(collection(db, "shops"));
-    snap.forEach(doc => {
-      console.log("SHOP:", doc.data());
-    });
-  }
-</script>
+    };
+  </script>
 
 </body>
 </html>
