@@ -1,135 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Shop Finder</title>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>Quantum Item Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body{
       margin:0;
-      font-family:Arial;
-      background:linear-gradient(135deg,#0f172a,#1e293b);
-      color:white;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      font-family:Arial, sans-serif;
     }
-    .box{
+    .card{
       width:320px;
       background:#fff;
-      color:#000;
-      padding:20px;
+      padding:25px;
       border-radius:12px;
-      margin:100px auto;
-      display:none;
+      box-shadow:0 15px 30px rgba(0,0,0,.3);
     }
-    input,button{
+    h2{
+      text-align:center;
+      margin-bottom:20px;
+    }
+    input{
       width:100%;
       padding:10px;
-      margin-top:10px;
+      margin-bottom:12px;
       border-radius:6px;
       border:1px solid #ccc;
     }
     button{
-      background:#2563eb;
-      color:white;
+      width:100%;
+      padding:12px;
       border:none;
+      border-radius:8px;
+      background:#1e3c72;
+      color:white;
+      font-size:16px;
       cursor:pointer;
     }
-    .shop{
-      background:#111827;
-      margin:10px;
-      padding:10px;
-      border-radius:8px;
+    button:hover{ background:#16325c; }
+    .msg{
+      margin-top:10px;
+      text-align:center;
+      color:green;
+      font-size:14px;
     }
   </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="box" id="loginBox">
-  <h3>🔐 Login</h3>
-  <input id="email" placeholder="Email">
+<div class="card">
+  <h2>🔐 Login / Signup</h2>
+
+  <input id="email" type="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
+
   <button onclick="login()">Login / Signup</button>
-  <p id="msg"></p>
+  <div class="msg" id="msg"></div>
 </div>
 
-<!-- SHOPS -->
-<div class="box" id="shopBox">
-  <h3>🏪 Chennai Grocery Shops</h3>
-  <div id="shops"></div>
-  <button onclick="logout()">Logout</button>
-</div>
+<!-- 🔥 FIREBASE FULL SETUP -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<script>
-/* 🔥 FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID"
-};
+  // ✅ YOUR FIREBASE CONFIG (already correct)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhpOhD7IXWdFXXXXXXXX",
+    authDomain: "quantum-item-finder-ed616.firebaseapp.com",
+    projectId: "quantum-item-finder-ed616",
+    storageBucket: "quantum-item-finder-ed616.appspot.com",
+    messagingSenderId: "52600435970",
+    appId: "1:52600435970:web:2198d29e3cfadb0e677e1b"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  // Init
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-/* LOGIN */
-function login(){
-  const e = email.value;
-  const p = password.value;
+  // ✅ LOGIN / SIGNUP
+  window.login = async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
 
-  auth.signInWithEmailAndPassword(e,p)
-  .catch(()=>auth.createUserWithEmailAndPassword(e,p))
-  .then(()=>{
-    loginBox.style.display="none";
-    shopBox.style.display="block";
-    loadShops();
-  })
-  .catch(err=>msg.innerText=err.message);
-}
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      msg.innerText = "Login success ✅";
+      loadShops();
+    } catch (e) {
+      if (e.code === "auth/user-not-found") {
+        await createUserWithEmailAndPassword(auth, email, password);
+        msg.innerText = "Signup success ✅";
+        loadShops();
+      } else {
+        msg.innerText = e.message;
+      }
+    }
+  };
 
-/* LOAD SHOPS */
-function loadShops(){
-  db.collection("shops")
-    .where("city","==","Chennai")
-    .get()
-    .then(res=>{
-      shops.innerHTML="";
-      res.forEach(doc=>{
-        const d = doc.data();
-        shops.innerHTML += `
-          <div class="shop">
-            <b>${d.name}</b><br>
-            📍 ${d.area}<br>
-            📞 ${d.Phone}<br>
-            🛒 ${d.Items.join(", ")}
-          </div>
-        `;
-      });
+  // ✅ FIRESTORE READ (shops)
+  async function loadShops(){
+    const snap = await getDocs(collection(db, "shops"));
+    snap.forEach(doc => {
+      console.log("SHOP:", doc.data());
     });
-}
-
-/* LOGOUT */
-function logout(){
-  auth.signOut().then(()=>{
-    shopBox.style.display="none";
-    loginBox.style.display="block";
-  });
-}
-
-/* AUTO CHECK */
-auth.onAuthStateChanged(u=>{
-  if(u){
-    loginBox.style.display="none";
-    shopBox.style.display="block";
-    loadShops();
-  }else{
-    loginBox.style.display="block";
   }
-});
 </script>
 
 </body>
