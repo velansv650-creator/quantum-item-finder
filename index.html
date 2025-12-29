@@ -1,132 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Quantum Item Finder</title>
+<meta charset="UTF-8">
+<title>Quantum Item Finder</title>
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: Arial, sans-serif;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f2027;
+  color: white;
+}
 
-    .login-box {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-      text-align: center;
-    }
+.card {
+  max-width: 360px;
+  margin: 80px auto;
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+}
 
-    .login-box h2 {
-      margin-bottom: 20px;
-    }
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+button {
+  background: #3949ab;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      background: #3b5bdb;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.hidden {
+  display: none;
+}
 
-    .error {
-      color: red;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-  </style>
+header {
+  background: #111;
+  color: gold;
+  padding: 15px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.result {
+  background: #1c1c1c;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="login-box">
-    <h2>🔐 Login / Signup</h2>
+<!-- LOGIN / SIGNUP -->
+<div class="card" id="loginBox">
+  <h3>🔐 Login / Signup</h3>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Signup</button>
+</div>
 
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
+<!-- HOME / SEARCH -->
+<div id="homeBox" class="hidden">
+  <header>🔍 Quantum Item Finder</header>
 
-    <button onclick="loginSignup()">Login / Signup</button>
-
-    <div class="error" id="error"></div>
+  <div class="card">
+    <input type="text" id="item" placeholder="Search item (Rice, Oil)">
+    <select id="area">
+      <option value="">Select Area</option>
+      <option>T Nagar</option>
+      <option>Anna Nagar</option>
+      <option>Velachery</option>
+      <option>Tambaram</option>
+      <option>Chromepet</option>
+    </select>
+    <button onclick="searchItem()">Search</button>
+    <div id="output"></div>
+    <button onclick="logout()">Logout</button>
   </div>
+</div>
 
-  <!-- 🔥 FIREBASE FULL SETUP (OLD + NEW COMBINED) -->
-  <script type="module">
-    // 🔹 OLD + NEW Firebase imports (CDN)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-    // 🔹 Firebase configuration (YOUR PROJECT – FINAL)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
-      authDomain: "quantum-item-finder-4a990.firebaseapp.com",
-      projectId: "quantum-item-finder-4a990",
-      storageBucket: "quantum-item-finder-4a990.appspot.com",
-      messagingSenderId: "500012758966",
-      appId: "1:500012758966:web:a63d60c776f6da1a9ff317",
-      measurementId: "G-CG9P771CFB"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
+  authDomain: "quantum-item-finder-4a990.firebaseapp.com",
+  projectId: "quantum-item-finder-4a990",
+  storageBucket: "quantum-item-finder-4a990.firebasestorage.app",
+  messagingSenderId: "500012758966",
+  appId: "1:500012758966:web:a63d60c776f6da1a9ff317"
+};
 
-    // 🔹 Initialize Firebase (OLD logic preserved)
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-    // 🔹 Authentication
-    const auth = getAuth(app);
+// LOGIN
+window.login = function () {
+  signInWithEmailAndPassword(auth,
+    email.value,
+    password.value
+  )
+  .then(() => {
+    showHome();
+  })
+  .catch(err => alert(err.message));
+}
 
-    // 🔹 Login + Signup (OREY FUNCTION)
-    window.loginSignup = async function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const errorBox = document.getElementById("error");
+// SIGNUP
+window.signup = function () {
+  createUserWithEmailAndPassword(auth,
+    email.value,
+    password.value
+  )
+  .then(() => {
+    alert("Signup successful ✅");
+    showHome();
+  })
+  .catch(err => alert(err.message));
+}
 
-      errorBox.innerText = "";
+// LOGOUT
+window.logout = function () {
+  signOut(auth);
+  homeBox.classList.add("hidden");
+  loginBox.classList.remove("hidden");
+}
 
-      if (!email || !password) {
-        errorBox.innerText = "Email & Password required";
-        return;
-      }
+// SHOW HOME
+function showHome() {
+  loginBox.classList.add("hidden");
+  homeBox.classList.remove("hidden");
+}
 
-      try {
-        // 🔐 LOGIN try
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Login successful ✅");
-        // window.location.href = "home.html";
-      } catch (loginErr) {
-        try {
-          // 🆕 If user not exists → SIGNUP
-          await createUserWithEmailAndPassword(auth, email, password);
-          alert("Signup successful ✅");
-          // window.location.href = "home.html";
-        } catch (signupErr) {
-          errorBox.innerText = signupErr.message;
-        }
-      }
-    };
-  </script>
+// SEARCH
+window.searchItem = function () {
+  const item = document.getElementById("item").value;
+  const area = document.getElementById("area").value;
+
+  if (!item || !area) {
+    output.innerHTML = "<div class='result'>❌ Enter item & area</div>";
+    return;
+  }
+
+  output.innerHTML = `
+    <div class="result">
+      ✅ <b>${item}</b> available in <b>${area}</b><br>
+      🏪 Nearby shops will be shown here
+    </div>
+  `;
+}
+</script>
 
 </body>
 </html>
