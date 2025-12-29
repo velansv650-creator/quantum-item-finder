@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>👑 Quantum Item Finder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -13,161 +12,140 @@
 <style>
 body{
   margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
+  font-family:Segoe UI, sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .card{
-  max-width:420px;
-  margin:40px auto;
-  background:#ffffff;
-  color:#222;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.4);
+  width:95%;
+  max-width:430px;
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
-h2{text-align:center;margin-bottom:15px}
-input,select,button{
+h2{text-align:center;margin:5px 0 15px}
+input,select{
   width:100%;
   padding:12px;
   margin-top:10px;
-  border-radius:8px;
+  border-radius:10px;
   border:1px solid #ccc;
-  font-size:16px;
+  font-size:15px;
 }
 button{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
   border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:bold;
   cursor:pointer;
 }
-.btn-main{
-  background:linear-gradient(45deg,#1d976c,#93f9b9);
-  color:#000;
-  font-weight:bold;
+.primary{background:linear-gradient(90deg,#1e3c72,#2a5298);color:#fff}
+.logout{background:#b02a37;color:#fff}
+.shop{
+  background:#f5f5f5;
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
 }
-.btn-danger{
-  background:#c0392b;
-  color:#fff;
-}
-.store{
-  background:#f4f6f7;
-  padding:12px;
-  border-radius:10px;
-  margin-top:10px;
-}
-.store b{color:#2c3e50}
-.call{
-  display:inline-block;
-  margin-top:6px;
-  padding:6px 12px;
-  background:#27ae60;
-  color:#fff;
-  border-radius:6px;
-  text-decoration:none;
-}
+.shop h3{margin:0;color:#1e3c72}
+.actions{display:flex;gap:8px;margin-top:8px}
+.call{background:#28a745;color:#fff;flex:1}
+.map{background:#dc3545;color:#fff;flex:1}
+.small{text-align:center;color:#777;margin-top:10px}
 .hide{display:none}
-small{color:#555}
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<div class="card" id="loginCard">
-<h2>🔐 Login / Signup</h2>
-<input id="email" placeholder="Email" />
-<input id="password" type="password" placeholder="Password" />
-<button class="btn-main" onclick="signup()">Signup</button>
-<button class="btn-main" onclick="login()">Login</button>
-<p id="msg"></p>
+<div class="card" id="loginBox">
+  <h2>🔐 Login / Signup</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="primary" onclick="login()">Login / Signup</button>
+  <div class="small" id="loginMsg"></div>
 </div>
 
 <!-- APP -->
-<div class="card hide" id="appCard">
-<h2>👑 Quantum Item Finder</h2>
-<p><b>User:</b> <span id="userMail"></span></p>
+<div class="card hide" id="appBox">
+  <h2>👑 Quantum Item Finder</h2>
+  <div class="small" id="userEmail"></div>
 
-<select id="area">
-  <option value="">Any Area</option>
-  <option>T Nagar</option>
-  <option>Velachery</option>
-  <option>Anna Nagar</option>
-  <option>Tambaram</option>
-</select>
+  <input id="itemInput" placeholder="Search item (rice, sugar, oil)">
+  <button class="primary" onclick="searchItem()">🔍 Search</button>
 
-<input id="item" placeholder="Search item (rice, sugar, oil)" />
-<button class="btn-main" onclick="search()">Search</button>
+  <div id="results"></div>
 
-<div id="results"></div>
-
-<button class="btn-danger" onclick="logout()">Logout</button>
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
-// 🔥 Firebase config
+/* 🔥 FIREBASE CONFIG (REPLACE YOUR VALUES) */
 const firebaseConfig = {
-  apiKey: "AIzaSyCCMTtL8uO4apuVk-Ut-LzPWCMOtQgoAvE",
-  authDomain: "quantum-item-finder.firebaseapp.com",
-  projectId: "quantum-item-finder",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🔐 Auth
-function signup(){
-  auth.createUserWithEmailAndPassword(
-    email.value,password.value
-  ).catch(e=>msg.innerText=e.message);
-}
+/* AUTH */
 function login(){
-  auth.signInWithEmailAndPassword(
-    email.value,password.value
-  ).catch(e=>msg.innerText=e.message);
+  const e=email.value,p=password.value;
+  auth.signInWithEmailAndPassword(e,p)
+  .catch(()=>auth.createUserWithEmailAndPassword(e,p))
+  .then(()=>loginMsg.innerText="Login successful");
 }
-function logout(){auth.signOut()}
+function logout(){auth.signOut();}
 
-// 🔄 Auth state
 auth.onAuthStateChanged(u=>{
   if(u){
-    loginCard.classList.add("hide");
-    appCard.classList.remove("hide");
-    userMail.innerText = u.email;
+    loginBox.classList.add("hide");
+    appBox.classList.remove("hide");
+    userEmail.innerText="User: "+u.email;
   }else{
-    loginCard.classList.remove("hide");
-    appCard.classList.add("hide");
+    loginBox.classList.remove("hide");
+    appBox.classList.add("hide");
   }
 });
 
-// 🔍 SEARCH
-async function search(){
-  results.innerHTML="⏳ Searching...";
-  let q = item.value.toLowerCase().trim();
-  let areaVal = area.value;
-
-  let ref = db.collection("shops")
-    .where("Items","array-contains",q);
-
-  let snap = await ref.get();
+/* SEARCH */
+async function searchItem(){
+  const item=itemInput.value.toLowerCase().trim();
   results.innerHTML="";
+  if(!item){results.innerHTML="<p class='small'>Enter item</p>";return;}
+
+  const snap=await db.collection("shops").get();
+  let found=false;
 
   snap.forEach(doc=>{
-    let d = doc.data();
-    if(areaVal && d.area !== areaVal) return;
-
-    results.innerHTML += `
-      <div class="store">
-        <b>${d.name}</b><br>
-        <small>${d.area}, ${d.City}</small><br>
-        📞 ${d.Phone}<br>
-        <a class="call" href="tel:${d.Phone}">Call</a>
-      </div>
-    `;
+    const d=doc.data();
+    if(d.items.map(i=>i.toLowerCase()).includes(item)){
+      found=true;
+      results.innerHTML+=`
+        <div class="shop">
+          <h3>🏪 ${d.name}</h3>
+          <p>📍 ${d.area}, ${d.city}</p>
+          <p>🛒 ${d.items.join(", ")}</p>
+          <div class="actions">
+            <button class="call" onclick="location.href='tel:${d.phone}'">📞 Call</button>
+            <button class="map" onclick="window.open('https://maps.google.com/?q=${d.lat},${d.lng}')">🗺 Map</button>
+          </div>
+        </div>`;
+    }
   });
-
-  if(results.innerHTML==="")
-    results.innerHTML="❌ No stores found";
+  if(!found)results.innerHTML="<p class='small'>No shop found</p>";
 }
 </script>
-
 </body>
 </html>
