@@ -6,79 +6,67 @@
 <title>Quantum Item Finder</title>
 
 <style>
-body{
-  margin:0;
-  height:100vh;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-}
-.card{
-  background:#fff;
-  color:#000;
-  padding:25px;
-  width:90%;
-  max-width:350px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.4);
-}
-h2{text-align:center;margin-bottom:15px;}
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-button{
-  background:#3949ab;
-  color:#fff;
-  border:none;
-  font-weight:bold;
-}
-.hidden{display:none;}
-.top{
-  position:absolute;
-  top:10px;
-  right:10px;
-}
+  body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+  }
+  .card{
+    background:#ffffff;
+    color:#000;
+    padding:25px;
+    width:320px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  }
+  h2{text-align:center;margin-bottom:15px;}
+  input,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+  }
+  button{
+    background:#2c4cff;
+    color:#fff;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  button:hover{opacity:0.9;}
+  #searchBox{display:none;}
+  #result{margin-top:12px;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="card">
+<div class="card" id="loginBox">
   <h2>🔐 Login / Signup</h2>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <button onclick="signup()">Signup</button>
+  <input id="email" type="email" placeholder="Email"/>
+  <input id="password" type="password" placeholder="Password"/>
+  <button onclick="login()">Login / Signup</button>
 </div>
 
-<!-- HOME / SEARCH -->
-<div id="homeBox" class="card hidden">
-  <div class="top">
-    <button onclick="logout()">Logout</button>
-  </div>
-  <h2>🔍 Item Search</h2>
-  <input id="item" placeholder="Item name (Rice, Oil...)">
-  <input id="area" placeholder="Area (Chennai area)">
+<div class="card" id="searchBox">
+  <h2>🔎 Item Search</h2>
+  <input id="item" placeholder="Item name (eg: Rice)"/>
+  <input id="area" placeholder="Area (eg: T Nagar)"/>
   <button onclick="search()">Search</button>
-  <p id="result"></p>
+  <div id="result"></div>
 </div>
 
 <script type="module">
-/* ---------------- FIREBASE ---------------- */
+/* ---------- FIREBASE ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
@@ -92,44 +80,56 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* ---------------- UI ---------------- */
-const loginBox = document.getElementById("loginBox");
-const homeBox  = document.getElementById("homeBox");
-const email    = document.getElementById("email");
-const password = document.getElementById("password");
+/* ---------- CHENNAI AREAS ---------- */
+const chennaiAreas = [
+ "T Nagar","Anna Nagar","Velachery","Adyar","Guindy",
+ "Tambaram","Chromepet","Pallavaram","Perungudi",
+ "Thiruvanmiyur","Mylapore","Triplicane","Royapettah",
+ "Kodambakkam","Ashok Nagar","KK Nagar","Saidapet",
+ "Egmore","Nungambakkam","Kilpauk","Porur","Ambattur",
+ "Avadi","Madipakkam","Pallikaranai","Sholinganallur",
+ "OMR","ECR","Besant Nagar","Washermanpet",
+ "Tondiarpet","Perambur","Kolathur"
+];
 
-/* ---------------- AUTH STATE ---------------- */
-onAuthStateChanged(auth, user=>{
-  if(user){
-    loginBox.classList.add("hidden");
-    homeBox.classList.remove("hidden");
-  }else{
-    homeBox.classList.add("hidden");
-    loginBox.classList.remove("hidden");
+/* ---------- LOGIN / SIGNUP ---------- */
+window.login = async ()=>{
+  const email = email.value;
+  const password = document.getElementById("password").value;
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    alert("Login successful ✅");
+    showSearch();
+  }catch(e){
+    await createUserWithEmailAndPassword(auth,email,password);
+    alert("Signup successful ✅");
+    showSearch();
   }
-});
+};
 
-/* ---------------- FUNCTIONS ---------------- */
-window.login = ()=>{
-  signInWithEmailAndPassword(auth,email.value,password.value)
-  .catch(e=>alert(e.message));
+function showSearch(){
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("searchBox").style.display="block";
 }
 
-window.signup = ()=>{
-  createUserWithEmailAndPassword(auth,email.value,password.value)
-  .catch(e=>alert(e.message));
-}
-
-window.logout = ()=>{
-  signOut(auth);
-}
-
+/* ---------- SEARCH ---------- */
 window.search = ()=>{
-  const i=document.getElementById("item").value;
-  const a=document.getElementById("area").value;
-  document.getElementById("result").innerText =
-    `✔ Searching "${i}" in "${a}" (demo result)`;
-}
+  const item = document.getElementById("item").value.trim();
+  const area = document.getElementById("area").value.trim();
+  const result = document.getElementById("result");
+
+  if(!item || !area){
+    result.innerText="❌ Item & Area both enter pannunga";
+    return;
+  }
+
+  if(chennaiAreas.map(a=>a.toLowerCase()).includes(area.toLowerCase())){
+    result.innerText=`✅ "${item}" available in ${area} (demo result)`;
+  }else{
+    result.innerText=`❌ ${area} Chennai list-la illa`;
+  }
+};
 </script>
 
 </body>
