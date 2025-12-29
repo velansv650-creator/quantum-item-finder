@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Quantum Item Finder</title>
+
   <style>
     body {
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: Arial, sans-serif;
+      margin: 0;
       height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      margin: 0;
+      align-items: center;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: Arial, sans-serif;
     }
-    .card {
-      background: #fff;
+
+    .login-box {
+      background: white;
       padding: 25px;
       border-radius: 12px;
       width: 320px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.3);
-    }
-    h2 {
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
       text-align: center;
+    }
+
+    .login-box h2 {
       margin-bottom: 20px;
     }
+
     input {
       width: 100%;
       padding: 10px;
@@ -31,22 +35,21 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
+
     button {
       width: 100%;
       padding: 10px;
       border: none;
       border-radius: 6px;
-      background: #3f51b5;
+      background: #3b5bdb;
       color: white;
       font-size: 16px;
       cursor: pointer;
     }
-    button:hover {
-      background: #2c3ea8;
-    }
-    #msg {
+
+    .error {
+      color: red;
       margin-top: 10px;
-      text-align: center;
       font-size: 14px;
     }
   </style>
@@ -54,71 +57,72 @@
 
 <body>
 
-  <div class="card">
+  <div class="login-box">
     <h2>🔐 Login / Signup</h2>
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
 
-    <button onclick="loginOrSignup()">Login / Signup</button>
+    <button onclick="loginSignup()">Login / Signup</button>
 
-    <div id="msg"></div>
+    <div class="error" id="error"></div>
   </div>
 
-  <!-- 🔥 FIREBASE FULL FINAL SCRIPT -->
+  <!-- 🔥 FIREBASE FULL SETUP (OLD + NEW COMBINED) -->
   <script type="module">
-    // ✅ NEW Firebase CDN imports (OLD imports REMOVE pannirukkanum)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    // 🔹 OLD + NEW Firebase imports (CDN)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-    // ✅ YOUR REAL Firebase config (screenshot-la irundhu)
+    // 🔹 Firebase configuration (YOUR PROJECT – FINAL)
     const firebaseConfig = {
-      apiKey: "AIzaSyAhpOhD7IXWdFXXXXXXXX",
-      authDomain: "quantum-item-finder-ed616.firebaseapp.com",
-      projectId: "quantum-item-finder-ed616",
-      storageBucket: "quantum-item-finder-ed616.appspot.com",
-      messagingSenderId: "52600435970",
-      appId: "1:52600435970:web:2198d29e3cfadb0e677e1b"
+      apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
+      authDomain: "quantum-item-finder-4a990.firebaseapp.com",
+      projectId: "quantum-item-finder-4a990",
+      storageBucket: "quantum-item-finder-4a990.appspot.com",
+      messagingSenderId: "500012758966",
+      appId: "1:500012758966:web:a63d60c776f6da1a9ff317",
+      measurementId: "G-CG9P771CFB"
     };
 
-    // ✅ Initialize Firebase
+    // 🔹 Initialize Firebase (OLD logic preserved)
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
 
-    // ✅ SINGLE button – Login OR Signup
-    window.loginOrSignup = async function () {
+    // 🔹 Authentication
+    const auth = getAuth(app);
+
+    // 🔹 Login + Signup (OREY FUNCTION)
+    window.loginSignup = async function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const msg = document.getElementById("msg");
+      const errorBox = document.getElementById("error");
 
-      msg.style.color = "black";
-      msg.innerText = "Please wait...";
+      errorBox.innerText = "";
+
+      if (!email || !password) {
+        errorBox.innerText = "Email & Password required";
+        return;
+      }
 
       try {
-        // 🔹 Try login
+        // 🔐 LOGIN try
         await signInWithEmailAndPassword(auth, email, password);
-        msg.style.color = "green";
-        msg.innerText = "✅ Login successful";
-        console.log("Login success");
-
-      } catch (err) {
-        if (err.code === "auth/user-not-found") {
-          // 🔹 If not exists → Signup
-          try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            msg.style.color = "green";
-            msg.innerText = "🎉 Signup successful";
-            console.log("Signup success");
-          } catch (signupErr) {
-            msg.style.color = "red";
-            msg.innerText = signupErr.message;
-          }
-        } else {
-          msg.style.color = "red";
-          msg.innerText = err.message;
+        alert("Login successful ✅");
+        // window.location.href = "home.html";
+      } catch (loginErr) {
+        try {
+          // 🆕 If user not exists → SIGNUP
+          await createUserWithEmailAndPassword(auth, email, password);
+          alert("Signup successful ✅");
+          // window.location.href = "home.html";
+        } catch (signupErr) {
+          errorBox.innerText = signupErr.message;
         }
       }
     };
