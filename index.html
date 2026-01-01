@@ -1,72 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantum Item Finder</title>
 
 <style>
-  body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-  }
-  .card{
-    background:#ffffff;
-    color:#000;
-    padding:25px;
-    width:320px;
-    border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.3);
-  }
-  h2{text-align:center;margin-bottom:15px;}
-  input,button{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
-  }
-  button{
-    background:#2c4cff;
-    color:#fff;
-    border:none;
-    font-weight:bold;
-    cursor:pointer;
-  }
-  button:hover{opacity:0.9;}
-  #searchBox{display:none;}
-  #result{margin-top:12px;font-weight:bold;}
+body{
+  margin:0;font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+.card{
+  background:#fff;color:#000;padding:22px;width:360px;
+  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+h2{text-align:center;margin:6px 0 14px;}
+input,select,button{
+  width:100%;padding:10px;margin-top:10px;border-radius:6px;
+  border:1px solid #ccc;font-size:14px;
+}
+button{background:#3949ab;color:#fff;border:none;font-weight:bold;cursor:pointer;}
+button.logout{background:#e53935;}
+#app{display:none;}
+#result{margin-top:10px;font-weight:bold;}
+.small{font-size:12px;color:#555;text-align:center;margin-top:6px;}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN / SIGNUP -->
 <div class="card" id="loginBox">
   <h2>🔐 Login / Signup</h2>
-  <input id="email" type="email" placeholder="Email"/>
-  <input id="password" type="password" placeholder="Password"/>
-  <button onclick="login()">Login / Signup</button>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password (min 6 chars)">
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Signup</button>
+  <div class="small">First time → Signup. Next → Login.</div>
 </div>
 
-<div class="card" id="searchBox">
-  <h2>🔎 Item Search</h2>
-  <input id="item" placeholder="Item name (eg: Rice)"/>
-  <input id="area" placeholder="Area (eg: T Nagar)"/>
+<!-- APP / SEARCH -->
+<div class="card" id="app">
+  <h2>🔍 Item Search</h2>
+
+  <select id="category"></select>
+  <input id="item" placeholder="Item name (Rice, Pen, Tablet)">
+  <select id="area"></select>
+
   <button onclick="search()">Search</button>
   <div id="result"></div>
+
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script type="module">
-/* ---------- FIREBASE ---------- */
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
@@ -77,58 +74,85 @@ const firebaseConfig = {
   appId: "1:500012758966:web:a63d60c776f6da1a9ff317"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const appFB = initializeApp(firebaseConfig);
+const auth = getAuth(appFB);
 
-/* ---------- CHENNAI AREAS ---------- */
+/* ================= DATA ================= */
+// MANY CHENNAI AREAS
 const chennaiAreas = [
- "T Nagar","Anna Nagar","Velachery","Adyar","Guindy",
- "Tambaram","Chromepet","Pallavaram","Perungudi",
- "Thiruvanmiyur","Mylapore","Triplicane","Royapettah",
- "Kodambakkam","Ashok Nagar","KK Nagar","Saidapet",
- "Egmore","Nungambakkam","Kilpauk","Porur","Ambattur",
- "Avadi","Madipakkam","Pallikaranai","Sholinganallur",
- "OMR","ECR","Besant Nagar","Washermanpet",
- "Tondiarpet","Perambur","Kolathur"
+ "Select Area","T Nagar","Anna Nagar","Velachery","Adyar","Guindy","Saidapet",
+ "Tambaram","Chromepet","Pallavaram","Perungudi","Thiruvanmiyur","Mylapore",
+ "Triplicane","Royapettah","Kodambakkam","Ashok Nagar","KK Nagar","Egmore",
+ "Nungambakkam","Kilpauk","Porur","Ambattur","Avadi","Madipakkam",
+ "Pallikaranai","Sholinganallur","OMR","ECR","Besant Nagar",
+ "Washermanpet","Tondiarpet","Perambur","Kolathur","Madhavaram",
+ "Red Hills","Poonamallee","Mogappair","Ayanavaram","Villivakkam",
+ "Thoraipakkam","Navalur","Siruseri","Urapakkam","Guduvanchery"
 ];
 
-/* ---------- LOGIN / SIGNUP ---------- */
-window.login = async ()=>{
-  const email = email.value;
-  const password = document.getElementById("password").value;
-
-  try{
-    await signInWithEmailAndPassword(auth,email,password);
-    alert("Login successful ✅");
-    showSearch();
-  }catch(e){
-    await createUserWithEmailAndPassword(auth,email,password);
-    alert("Signup successful ✅");
-    showSearch();
-  }
+// CATEGORIES + DEMO ITEMS (nee ketta ellamey cover)
+const categories = {
+  "Select Category": [],
+  "Grocery": ["Rice","Wheat","Sugar","Oil","Salt","Milk","Eggs","Dal","Spices"],
+  "Stationery": ["Pen","Pencil","Notebook","Eraser","Scale","Marker","File"],
+  "Medical": ["Paracetamol","Vitamin C","ORS","Thermometer","Bandage"],
+  "Hospital": ["OPD","Emergency","Pharmacy","Lab","Scan"],
+  "Electronics": ["Mobile","Charger","Headset","Power Bank","USB Cable"],
+  "Hardware": ["Hammer","Screwdriver","Drill","Nails","Wrench"],
+  "Mechanic": ["Bike Service","Car Service","Oil Change","Brake Check"],
+  "Bakery": ["Bread","Cake","Bun","Cookies"],
+  "Hotel": ["Meals","Biryani","Dosa","Idli"],
+  "Vegetable": ["Tomato","Onion","Potato","Carrot","Beans"]
 };
 
-function showSearch(){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("searchBox").style.display="block";
-}
+/* ================= POPULATE DROPDOWNS ================= */
+const areaSelect = document.getElementById("area");
+chennaiAreas.forEach(a=>{
+  const o=document.createElement("option"); o.value=a; o.textContent=a;
+  areaSelect.appendChild(o);
+});
 
-/* ---------- SEARCH ---------- */
+const catSelect = document.getElementById("category");
+Object.keys(categories).forEach(c=>{
+  const o=document.createElement("option"); o.value=c; o.textContent=c;
+  catSelect.appendChild(o);
+});
+
+/* ================= AUTH STATE ================= */
+onAuthStateChanged(auth, user=>{
+  document.getElementById("loginBox").style.display = user ? "none":"block";
+  document.getElementById("app").style.display      = user ? "block":"none";
+});
+
+/* ================= LOGIN / SIGNUP ================= */
+window.login = ()=>{
+  signInWithEmailAndPassword(auth,email.value,password.value)
+    .catch(e=>alert(e.message));
+};
+window.signup = ()=>{
+  createUserWithEmailAndPassword(auth,email.value,password.value)
+    .catch(e=>alert(e.message));
+};
+window.logout = ()=> signOut(auth);
+
+/* ================= SEARCH (DEMO LOGIC) ================= */
 window.search = ()=>{
+  const cat = catSelect.value;
   const item = document.getElementById("item").value.trim();
-  const area = document.getElementById("area").value.trim();
-  const result = document.getElementById("result");
+  const area = areaSelect.value;
+  const res  = document.getElementById("result");
 
-  if(!item || !area){
-    result.innerText="❌ Item & Area both enter pannunga";
+  if(cat==="Select Category" || area==="Select Area" || !item){
+    res.innerText = "❌ Category, Item & Area select pannunga";
     return;
   }
 
-  if(chennaiAreas.map(a=>a.toLowerCase()).includes(area.toLowerCase())){
-    result.innerText=`✅ "${item}" available in ${area} (demo result)`;
-  }else{
-    result.innerText=`❌ ${area} Chennai list-la illa`;
-  }
+  const items = categories[cat] || [];
+  const found = items.map(x=>x.toLowerCase()).includes(item.toLowerCase());
+
+  res.innerText = found
+    ? `✅ "${item}" found in ${area} (${cat}) – demo`
+    : `ℹ️ "${item}" not in demo list for ${cat}, but available in ${area} (demo)`;
 };
 </script>
 
