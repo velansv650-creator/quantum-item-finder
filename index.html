@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Quantum Item Finder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
 from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -21,16 +22,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 window.loginSignup = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert("Signup successful ✅");
+    await createUserWithEmailAndPassword(auth, email.value, password.value);
     showSearch();
   } catch (e) {
     if (e.code === "auth/email-already-in-use") {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful ✅");
+      await signInWithEmailAndPassword(auth, email.value, password.value);
       showSearch();
     } else {
       alert(e.message);
@@ -44,105 +41,181 @@ window.logoutUser = async () => {
 };
 </script>
 
-<!-- QR Code -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
 <style>
-body {
-  background: linear-gradient(135deg,#1f4037,#99f2c8);
-  font-family: Arial;
+:root{
+  --primary:#1a73e8;
+  --bg:#f8f9fa;
+  --card:#ffffff;
+  --text:#202124;
+  --muted:#5f6368;
+  --success:#1e8e3e;
+  --danger:#d93025;
 }
-.card {
-  background:#fff;
-  padding:20px;
-  width:320px;
-  margin:80px auto;
-  border-radius:10px;
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg);
+  color:var(--text);
 }
-input,select,button {
+
+.container{
+  max-width:380px;
+  margin:40px auto;
+  padding:16px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+h2{
+  margin:0 0 16px;
+  font-weight:600;
+  text-align:center;
+}
+
+input,select{
   width:100%;
-  padding:10px;
-  margin-top:10px;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #dadce0;
+  margin-top:12px;
+  font-size:15px;
 }
-button {
+
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--primary);
+}
+
+.btn{
+  width:100%;
+  padding:14px;
+  margin-top:14px;
+  border-radius:12px;
   border:none;
-  color:white;
-  font-size:16px;
+  font-size:15px;
+  font-weight:500;
   cursor:pointer;
 }
-.blue { background:#3f51b5; }
-.red { background:#d84315; }
-.green { background:#2e7d32; }
-.hidden { display:none; }
+
+.primary{background:var(--primary);color:#fff}
+.success{background:var(--success);color:#fff}
+.danger{background:var(--danger);color:#fff}
+.outline{
+  background:#fff;
+  border:1px solid #dadce0;
+}
+
+.hidden{display:none}
+
+.shop{
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid #eee;
+}
+
+.qr{
+  display:flex;
+  justify-content:center;
+  margin-top:12px;
+}
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <!-- LOGIN -->
 <div class="card" id="loginBox">
-  <h2>🔐 Login / Signup</h2>
-  <input id="emailInput" placeholder="Email">
-  <input id="passwordInput" type="password" placeholder="Password">
-  <button class="blue" onclick="loginSignup()">Login / Signup</button>
+  <h2>🔐 Sign in</h2>
+  <input id="email" placeholder="Email address">
+  <input id="password" type="password" placeholder="Password">
+  <button class="btn primary" onclick="loginSignup()">Continue</button>
+  <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:10px">
+    First time → Signup · Next → Login
+  </p>
 </div>
 
 <!-- SEARCH -->
 <div class="card hidden" id="searchBox">
   <h2>🔍 Item Search</h2>
 
-  <select id="category">
+  <select>
     <option>Groceries</option>
-    <option>Electronics</option>
     <option>Stationery</option>
+    <option>Electronics</option>
+    <option>Medical</option>
   </select>
 
-  <input id="itemName" placeholder="Item name">
+  <input id="itemName" placeholder="Item name (Pen, Rice, Tablet)">
 
   <select id="area">
-    <option>Chennai - T Nagar</option>
-    <option>Chennai - Velachery</option>
-    <option>Chennai - Tambaram</option>
+    <option>Velachery</option>
+    <option>T Nagar</option>
+    <option>Anna Nagar</option>
+    <option>Tambaram</option>
+    <option>Guindy</option>
+    <option>Adyar</option>
+    <option>Porur</option>
+    <option>KK Nagar</option>
+    <option>OMR</option>
+    <option>Sholinganallur</option>
+    <option>Medavakkam</option>
+    <option>Ambattur</option>
+    <option>Mylapore</option>
+    <option>Nungambakkam</option>
+    <option>Egmore</option>
+    <option>Perambur</option>
   </select>
 
-  <button class="blue" onclick="preBook()">Pre-Book</button>
-  <button class="red" onclick="logoutUser()">Logout</button>
+  <button class="btn primary" onclick="preBook()">Pre-Book</button>
+  <button class="btn outline" onclick="logoutUser()">Logout</button>
 
-  <div id="result" class="hidden">
-    <hr>
-    <p><b>Shop:</b> Local Store</p>
+  <div class="shop hidden" id="result">
+    <p><b>Shop:</b> Local Verified Store</p>
 
-    <button class="green" onclick="callShop()">📞 Call</button>
-    <button class="green" onclick="whatsappShop()">💬 WhatsApp</button>
+    <button class="btn success" onclick="callShop()">📞 Call Shop</button>
+    <button class="btn success" onclick="whatsappShop()">💬 WhatsApp</button>
 
-    <h3>QR Code (Confirm at Shop)</h3>
-    <div id="qrcode"></div>
+    <p style="margin-top:14px;font-weight:500">QR Code (Confirm at shop)</p>
+    <div class="qr" id="qrcode"></div>
   </div>
 </div>
 
+</div>
+
 <script>
-function showSearch() {
+function showSearch(){
   loginBox.classList.add("hidden");
   searchBox.classList.remove("hidden");
 }
 
-function preBook() {
+function preBook(){
   result.classList.remove("hidden");
-  qrcode.innerHTML = "";
-  new QRCode(qrcode, {
-    text: itemName.value + " | " + area.value,
-    width:150,
-    height:150
+  qrcode.innerHTML="";
+  new QRCode(qrcode,{
+    text:`Item:${itemName.value} | Area:${area.value}`,
+    width:160,
+    height:160
   });
-  alert("Pre-Booking Confirmed ✅");
 }
 
-function callShop() {
-  window.location.href = "tel:9876543210";
+function callShop(){
+  location.href="tel:9876543210";
 }
 
-function whatsappShop() {
-  const msg = `Pre-Booking Item: ${itemName.value} Area: ${area.value}`;
+function whatsappShop(){
+  const msg=`Pre-Book Item: ${itemName.value}\nArea: ${area.value}`;
   window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
 }
 </script>
