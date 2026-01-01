@@ -2,69 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantum Item Finder</title>
 
-<style>
-body{
-  margin:0;font-family:Arial,sans-serif;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-}
-.card{
-  background:#fff;color:#000;padding:22px;width:360px;
-  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);
-}
-h2{text-align:center;margin:6px 0 14px;}
-input,select,button{
-  width:100%;padding:10px;margin-top:10px;border-radius:6px;
-  border:1px solid #ccc;font-size:14px;
-}
-button{background:#3949ab;color:#fff;border:none;font-weight:bold;cursor:pointer;}
-button.logout{background:#e53935;}
-#app{display:none;}
-#result{margin-top:10px;font-weight:bold;}
-.small{font-size:12px;color:#555;text-align:center;margin-top:6px;}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN / SIGNUP -->
-<div class="card" id="loginBox">
-  <h2>🔐 Login / Signup</h2>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password (min 6 chars)">
-  <button onclick="login()">Login</button>
-  <button onclick="signup()">Signup</button>
-  <div class="small">First time → Signup. Next → Login.</div>
-</div>
-
-<!-- APP / SEARCH -->
-<div class="card" id="app">
-  <h2>🔍 Item Search</h2>
-
-  <select id="category"></select>
-  <input id="item" placeholder="Item name (Rice, Pen, Tablet)">
-  <select id="area"></select>
-
-  <button onclick="search()">Search</button>
-  <div id="result"></div>
-
-  <button class="logout" onclick="logout()">Logout</button>
-</div>
-
+<!-- Firebase SDK -->
 <script type="module">
-/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
+/* 🔥 FIREBASE CONFIG (UNCHANGED) */
 const firebaseConfig = {
   apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
   authDomain: "quantum-item-finder-4a990.firebaseapp.com",
@@ -74,87 +22,109 @@ const firebaseConfig = {
   appId: "1:500012758966:web:a63d60c776f6da1a9ff317"
 };
 
-const appFB = initializeApp(firebaseConfig);
-const auth = getAuth(appFB);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-/* ================= DATA ================= */
-// MANY CHENNAI AREAS
-const chennaiAreas = [
- "Select Area","T Nagar","Anna Nagar","Velachery","Adyar","Guindy","Saidapet",
- "Tambaram","Chromepet","Pallavaram","Perungudi","Thiruvanmiyur","Mylapore",
- "Triplicane","Royapettah","Kodambakkam","Ashok Nagar","KK Nagar","Egmore",
- "Nungambakkam","Kilpauk","Porur","Ambattur","Avadi","Madipakkam",
- "Pallikaranai","Sholinganallur","OMR","ECR","Besant Nagar",
- "Washermanpet","Tondiarpet","Perambur","Kolathur","Madhavaram",
- "Red Hills","Poonamallee","Mogappair","Ayanavaram","Villivakkam",
- "Thoraipakkam","Navalur","Siruseri","Urapakkam","Guduvanchery"
-];
-
-// CATEGORIES + DEMO ITEMS (nee ketta ellamey cover)
-const categories = {
-  "Select Category": [],
-  "Grocery": ["Rice","Wheat","Sugar","Oil","Salt","Milk","Eggs","Dal","Spices"],
-  "Stationery": ["Pen","Pencil","Notebook","Eraser","Scale","Marker","File"],
-  "Medical": ["Paracetamol","Vitamin C","ORS","Thermometer","Bandage"],
-  "Hospital": ["OPD","Emergency","Pharmacy","Lab","Scan"],
-  "Electronics": ["Mobile","Charger","Headset","Power Bank","USB Cable"],
-  "Hardware": ["Hammer","Screwdriver","Drill","Nails","Wrench"],
-  "Mechanic": ["Bike Service","Car Service","Oil Change","Brake Check"],
-  "Bakery": ["Bread","Cake","Bun","Cookies"],
-  "Hotel": ["Meals","Biryani","Dosa","Idli"],
-  "Vegetable": ["Tomato","Onion","Potato","Carrot","Beans"]
-};
-
-/* ================= POPULATE DROPDOWNS ================= */
-const areaSelect = document.getElementById("area");
-chennaiAreas.forEach(a=>{
-  const o=document.createElement("option"); o.value=a; o.textContent=a;
-  areaSelect.appendChild(o);
-});
-
-const catSelect = document.getElementById("category");
-Object.keys(categories).forEach(c=>{
-  const o=document.createElement("option"); o.value=c; o.textContent=c;
-  catSelect.appendChild(o);
-});
-
-/* ================= AUTH STATE ================= */
-onAuthStateChanged(auth, user=>{
-  document.getElementById("loginBox").style.display = user ? "none":"block";
-  document.getElementById("app").style.display      = user ? "block":"none";
-});
-
-/* ================= LOGIN / SIGNUP ================= */
-window.login = ()=>{
-  signInWithEmailAndPassword(auth,email.value,password.value)
-    .catch(e=>alert(e.message));
-};
-window.signup = ()=>{
-  createUserWithEmailAndPassword(auth,email.value,password.value)
-    .catch(e=>alert(e.message));
-};
-window.logout = ()=> signOut(auth);
-
-/* ================= SEARCH (DEMO LOGIC) ================= */
-window.search = ()=>{
-  const cat = catSelect.value;
-  const item = document.getElementById("item").value.trim();
-  const area = areaSelect.value;
-  const res  = document.getElementById("result");
-
-  if(cat==="Select Category" || area==="Select Area" || !item){
-    res.innerText = "❌ Category, Item & Area select pannunga";
-    return;
+/* 🔐 LOGIN / SIGNUP */
+window.loginSignup = async () => {
+  const email = email.value;
+  const password = password.value;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Signup successful ✅");
+  } catch {
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("Login successful ✅");
   }
+};
 
-  const items = categories[cat] || [];
-  const found = items.map(x=>x.toLowerCase()).includes(item.toLowerCase());
+/* 🔓 LOGOUT */
+window.logout = async () => {
+  await signOut(auth);
+};
 
-  res.innerText = found
-    ? `✅ "${item}" found in ${area} (${cat}) – demo`
-    : `ℹ️ "${item}" not in demo list for ${cat}, but available in ${area} (demo)`;
+/* 🔒 SECURITY */
+onAuthStateChanged(auth, user => {
+  loginBox.style.display = user ? "none" : "block";
+  appBox.style.display = user ? "block" : "none";
+});
+
+/* 📦 PRE BOOK + WHATSAPP + QR */
+window.preBook = async () => {
+  const bookingId = "QIF-" + Date.now();
+
+  await addDoc(collection(db, "bookings"), {
+    item: item.value,
+    area: area.value,
+    bookingId,
+    time: serverTimestamp()
+  });
+
+  const msg = `Quantum Item Finder Pre-Booking
+Item: ${item.value}
+Area: ${area.value}
+Booking ID: ${bookingId}`;
+
+  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
+
+  qr.innerHTML = "";
+  new QRCode(qr, bookingId);
 };
 </script>
+
+<!-- QR CODE LIB -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+<style>
+body{background:#1e2a2f;font-family:Arial}
+.box{background:#fff;max-width:360px;margin:40px auto;padding:20px;border-radius:12px}
+input,select{width:100%;padding:10px;margin-top:8px}
+button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px;font-size:16px}
+.blue{background:#3f51b5;color:white}
+.green{background:#25D366;color:white}
+.red{background:#e53935;color:white}
+</style>
+</head>
+
+<body>
+
+<!-- 🔐 LOGIN -->
+<div class="box" id="loginBox">
+<h2>🔐 Login / Signup</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button class="blue" onclick="loginSignup()">Login / Signup</button>
+</div>
+
+<!-- 🔍 APP -->
+<div class="box" id="appBox" style="display:none">
+<h2>🔍 Item Search</h2>
+
+<select id="item">
+<option>Rice</option>
+<option>Pen</option>
+<option>Tablet</option>
+</select>
+
+<select id="area">
+<option>T Nagar</option>
+<option>Anna Nagar</option>
+<option>Velachery</option>
+<option>Tambaram</option>
+<option>Adyar</option>
+<option>OMR</option>
+<option>Guindy</option>
+<option>Perambur</option>
+</select>
+
+<button class="green" onclick="preBook()">Pre-Book (WhatsApp)</button>
+<button class="blue" onclick="window.location.href='tel:9876543210'">📞 Call Shop</button>
+<button class="red" onclick="logout()">Logout</button>
+
+<h3>📲 QR / Booking ID</h3>
+<div id="qr"></div>
+</div>
 
 </body>
 </html>
