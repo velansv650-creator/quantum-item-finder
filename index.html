@@ -4,127 +4,148 @@
 <meta charset="UTF-8">
 <title>Quantum Item Finder</title>
 
-<!-- Firebase SDK -->
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
 from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } 
-from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-/* 🔥 FIREBASE CONFIG (UNCHANGED) */
 const firebaseConfig = {
   apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
   authDomain: "quantum-item-finder-4a990.firebaseapp.com",
   projectId: "quantum-item-finder-4a990",
-  storageBucket: "quantum-item-finder-4a990.firebasestorage.app",
-  messagingSenderId: "500012758966",
   appId: "1:500012758966:web:a63d60c776f6da1a9ff317"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 
-/* 🔐 LOGIN / SIGNUP */
 window.loginSignup = async () => {
-  const email = email.value;
-  const password = password.value;
+  const email = emailInput.value;
+  const password = passwordInput.value;
   try {
     await createUserWithEmailAndPassword(auth, email, password);
     alert("Signup successful ✅");
-  } catch {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("Login successful ✅");
+    showSearch();
+  } catch (e) {
+    if (e.code === "auth/email-already-in-use") {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Login successful ✅");
+      showSearch();
+    } else {
+      alert(e.message);
+    }
   }
 };
 
-/* 🔓 LOGOUT */
-window.logout = async () => {
+window.logoutUser = async () => {
   await signOut(auth);
-};
-
-/* 🔒 SECURITY */
-onAuthStateChanged(auth, user => {
-  loginBox.style.display = user ? "none" : "block";
-  appBox.style.display = user ? "block" : "none";
-});
-
-/* 📦 PRE BOOK + WHATSAPP + QR */
-window.preBook = async () => {
-  const bookingId = "QIF-" + Date.now();
-
-  await addDoc(collection(db, "bookings"), {
-    item: item.value,
-    area: area.value,
-    bookingId,
-    time: serverTimestamp()
-  });
-
-  const msg = `Quantum Item Finder Pre-Booking
-Item: ${item.value}
-Area: ${area.value}
-Booking ID: ${bookingId}`;
-
-  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
-
-  qr.innerHTML = "";
-  new QRCode(qr, bookingId);
+  location.reload();
 };
 </script>
 
-<!-- QR CODE LIB -->
+<!-- QR Code -->
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
 <style>
-body{background:#1e2a2f;font-family:Arial}
-.box{background:#fff;max-width:360px;margin:40px auto;padding:20px;border-radius:12px}
-input,select{width:100%;padding:10px;margin-top:8px}
-button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:6px;font-size:16px}
-.blue{background:#3f51b5;color:white}
-.green{background:#25D366;color:white}
-.red{background:#e53935;color:white}
+body {
+  background: linear-gradient(135deg,#1f4037,#99f2c8);
+  font-family: Arial;
+}
+.card {
+  background:#fff;
+  padding:20px;
+  width:320px;
+  margin:80px auto;
+  border-radius:10px;
+}
+input,select,button {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+}
+button {
+  border:none;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+.blue { background:#3f51b5; }
+.red { background:#d84315; }
+.green { background:#2e7d32; }
+.hidden { display:none; }
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN -->
-<div class="box" id="loginBox">
-<h2>🔐 Login / Signup</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button class="blue" onclick="loginSignup()">Login / Signup</button>
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+  <h2>🔐 Login / Signup</h2>
+  <input id="emailInput" placeholder="Email">
+  <input id="passwordInput" type="password" placeholder="Password">
+  <button class="blue" onclick="loginSignup()">Login / Signup</button>
 </div>
 
-<!-- 🔍 APP -->
-<div class="box" id="appBox" style="display:none">
-<h2>🔍 Item Search</h2>
+<!-- SEARCH -->
+<div class="card hidden" id="searchBox">
+  <h2>🔍 Item Search</h2>
 
-<select id="item">
-<option>Rice</option>
-<option>Pen</option>
-<option>Tablet</option>
-</select>
+  <select id="category">
+    <option>Groceries</option>
+    <option>Electronics</option>
+    <option>Stationery</option>
+  </select>
 
-<select id="area">
-<option>T Nagar</option>
-<option>Anna Nagar</option>
-<option>Velachery</option>
-<option>Tambaram</option>
-<option>Adyar</option>
-<option>OMR</option>
-<option>Guindy</option>
-<option>Perambur</option>
-</select>
+  <input id="itemName" placeholder="Item name">
 
-<button class="green" onclick="preBook()">Pre-Book (WhatsApp)</button>
-<button class="blue" onclick="window.location.href='tel:9876543210'">📞 Call Shop</button>
-<button class="red" onclick="logout()">Logout</button>
+  <select id="area">
+    <option>Chennai - T Nagar</option>
+    <option>Chennai - Velachery</option>
+    <option>Chennai - Tambaram</option>
+  </select>
 
-<h3>📲 QR / Booking ID</h3>
-<div id="qr"></div>
+  <button class="blue" onclick="preBook()">Pre-Book</button>
+  <button class="red" onclick="logoutUser()">Logout</button>
+
+  <div id="result" class="hidden">
+    <hr>
+    <p><b>Shop:</b> Local Store</p>
+
+    <button class="green" onclick="callShop()">📞 Call</button>
+    <button class="green" onclick="whatsappShop()">💬 WhatsApp</button>
+
+    <h3>QR Code (Confirm at Shop)</h3>
+    <div id="qrcode"></div>
+  </div>
 </div>
+
+<script>
+function showSearch() {
+  loginBox.classList.add("hidden");
+  searchBox.classList.remove("hidden");
+}
+
+function preBook() {
+  result.classList.remove("hidden");
+  qrcode.innerHTML = "";
+  new QRCode(qrcode, {
+    text: itemName.value + " | " + area.value,
+    width:150,
+    height:150
+  });
+  alert("Pre-Booking Confirmed ✅");
+}
+
+function callShop() {
+  window.location.href = "tel:9876543210";
+}
+
+function whatsappShop() {
+  const msg = `Pre-Booking Item: ${itemName.value} Area: ${area.value}`;
+  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
+}
+</script>
 
 </body>
 </html>
