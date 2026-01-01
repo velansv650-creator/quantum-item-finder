@@ -1,223 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Quantum Item Finder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Firebase -->
+<!-- PREMIUM UI -->
+<style>
+  body{
+    margin:0;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg,#1f4037,#99f2c8);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .card{
+    background:#fff;
+    width:92%;
+    max-width:420px;
+    border-radius:20px;
+    padding:22px;
+    box-shadow:0 20px 40px rgba(0,0,0,.25);
+  }
+  h2{text-align:center;margin:10px 0 20px}
+  input,select,button{
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    border-radius:12px;
+    border:1px solid #ddd;
+    font-size:16px;
+  }
+  button{
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .primary{background:#3b6fdc;color:#fff}
+  .danger{background:#d9534f;color:#fff}
+  .success{background:#3c8d40;color:#fff}
+  .outline{background:#fff;border:1px solid #ccc}
+  .hidden{display:none}
+  .shopBox{
+    margin-top:20px;
+    padding-top:15px;
+    border-top:1px solid #eee;
+  }
+  iframe{border-radius:12px;margin-top:10px}
+  .qr{text-align:center;margin-top:15px}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<!-- 🔐 LOGIN -->
+<div id="loginBox">
+  <h2>🔐 Login / Signup</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="primary" onclick="login()">Login / Signup</button>
+</div>
+
+<!-- 🔍 SEARCH -->
+<div id="searchBox" class="hidden">
+  <h2>🔍 Item Search</h2>
+
+  <select id="category">
+    <option>Grocery</option>
+    <option>Vegetables</option>
+    <option>Fruits</option>
+    <option>Medical</option>
+    <option>Stationery</option>
+    <option>Electronics</option>
+    <option>Bakery</option>
+    <option>Dairy</option>
+  </select>
+
+  <input id="item" placeholder="Item name (Rice / Tablet / Pen)">
+
+  <select id="area">
+    <option>Velachery</option>
+    <option>T Nagar</option>
+    <option>Adyar</option>
+    <option>Anna Nagar</option>
+    <option>Guindy</option>
+    <option>Tambaram</option>
+    <option>Medavakkam</option>
+    <option>Sholinganallur</option>
+    <option>OMR</option>
+    <option>ECR</option>
+    <option>Chromepet</option>
+    <option>Pallavaram</option>
+    <option>Ambattur</option>
+    <option>Avadi</option>
+    <option>Mylapore</option>
+    <option>Besant Nagar</option>
+    <option>Nungambakkam</option>
+    <option>Egmore</option>
+    <option>Triplicane</option>
+  </select>
+
+  <button class="primary" onclick="preBook()">Pre-Book</button>
+  <button class="outline" onclick="logout()">Logout</button>
+
+  <!-- 🏪 SHOP -->
+  <div id="shop" class="shopBox hidden">
+    <b>Shop:</b> Local Verified Store
+
+    <button class="success" onclick="callShop()">📞 Call Shop</button>
+    <button class="success" onclick="whatsapp()">💬 WhatsApp</button>
+
+    <!-- 🗺 MAP -->
+    <iframe id="map" width="100%" height="200" loading="lazy"></iframe>
+
+    <!-- 🔳 QR -->
+    <div class="qr">
+      <b>QR Code (Confirm at Shop)</b><br>
+      <img id="qrImg" width="200">
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- 🔥 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
-from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCE21rVu1qcMtjnUhPmNHtef-GfqofnZf0",
   authDomain: "quantum-item-finder-4a990.firebaseapp.com",
   projectId: "quantum-item-finder-4a990",
+  storageBucket: "quantum-item-finder-4a990.appspot.com",
+  messagingSenderId: "500012758966",
   appId: "1:500012758966:web:a63d60c776f6da1a9ff317"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-window.loginSignup = async () => {
+window.login = async () => {
+  const e = email.value, p = password.value;
   try {
-    await createUserWithEmailAndPassword(auth, email.value, password.value);
-    showSearch();
-  } catch (e) {
-    if (e.code === "auth/email-already-in-use") {
-      await signInWithEmailAndPassword(auth, email.value, password.value);
-      showSearch();
-    } else {
-      alert(e.message);
-    }
+    await signInWithEmailAndPassword(auth,e,p);
+    openApp();
+  } catch {
+    await createUserWithEmailAndPassword(auth,e,p);
+    openApp();
   }
 };
 
-window.logoutUser = async () => {
+window.logout = async ()=>{
   await signOut(auth);
   location.reload();
 };
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-
-<style>
-:root{
-  --primary:#1a73e8;
-  --bg:#f8f9fa;
-  --card:#ffffff;
-  --text:#202124;
-  --muted:#5f6368;
-  --success:#1e8e3e;
-  --danger:#d93025;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  background:var(--bg);
-  color:var(--text);
-}
-
-.container{
-  max-width:380px;
-  margin:40px auto;
-  padding:16px;
-}
-
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:24px;
-  box-shadow:0 8px 24px rgba(0,0,0,.08);
-}
-
-h2{
-  margin:0 0 16px;
-  font-weight:600;
-  text-align:center;
-}
-
-input,select{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid #dadce0;
-  margin-top:12px;
-  font-size:15px;
-}
-
-input:focus,select:focus{
-  outline:none;
-  border-color:var(--primary);
-}
-
-.btn{
-  width:100%;
-  padding:14px;
-  margin-top:14px;
-  border-radius:12px;
-  border:none;
-  font-size:15px;
-  font-weight:500;
-  cursor:pointer;
-}
-
-.primary{background:var(--primary);color:#fff}
-.success{background:var(--success);color:#fff}
-.danger{background:var(--danger);color:#fff}
-.outline{
-  background:#fff;
-  border:1px solid #dadce0;
-}
-
-.hidden{display:none}
-
-.shop{
-  margin-top:20px;
-  padding-top:16px;
-  border-top:1px solid #eee;
-}
-
-.qr{
-  display:flex;
-  justify-content:center;
-  margin-top:12px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<!-- LOGIN -->
-<div class="card" id="loginBox">
-  <h2>🔐 Sign in</h2>
-  <input id="email" placeholder="Email address">
-  <input id="password" type="password" placeholder="Password">
-  <button class="btn primary" onclick="loginSignup()">Continue</button>
-  <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:10px">
-    First time → Signup · Next → Login
-  </p>
-</div>
-
-<!-- SEARCH -->
-<div class="card hidden" id="searchBox">
-  <h2>🔍 Item Search</h2>
-
-  <select>
-    <option>Groceries</option>
-    <option>Stationery</option>
-    <option>Electronics</option>
-    <option>Medical</option>
-  </select>
-
-  <input id="itemName" placeholder="Item name (Pen, Rice, Tablet)">
-
-  <select id="area">
-    <option>Velachery</option>
-    <option>T Nagar</option>
-    <option>Anna Nagar</option>
-    <option>Tambaram</option>
-    <option>Guindy</option>
-    <option>Adyar</option>
-    <option>Porur</option>
-    <option>KK Nagar</option>
-    <option>OMR</option>
-    <option>Sholinganallur</option>
-    <option>Medavakkam</option>
-    <option>Ambattur</option>
-    <option>Mylapore</option>
-    <option>Nungambakkam</option>
-    <option>Egmore</option>
-    <option>Perambur</option>
-  </select>
-
-  <button class="btn primary" onclick="preBook()">Pre-Book</button>
-  <button class="btn outline" onclick="logoutUser()">Logout</button>
-
-  <div class="shop hidden" id="result">
-    <p><b>Shop:</b> Local Verified Store</p>
-
-    <button class="btn success" onclick="callShop()">📞 Call Shop</button>
-    <button class="btn success" onclick="whatsappShop()">💬 WhatsApp</button>
-
-    <p style="margin-top:14px;font-weight:500">QR Code (Confirm at shop)</p>
-    <div class="qr" id="qrcode"></div>
-  </div>
-</div>
-
-</div>
-
-<script>
-function showSearch(){
+function openApp(){
   loginBox.classList.add("hidden");
   searchBox.classList.remove("hidden");
 }
 
-function preBook(){
-  result.classList.remove("hidden");
-  qrcode.innerHTML="";
-  new QRCode(qrcode,{
-    text:`Item:${itemName.value} | Area:${area.value}`,
-    width:160,
-    height:160
-  });
-}
+window.preBook = ()=>{
+  shop.classList.remove("hidden");
 
-function callShop(){
-  location.href="tel:9876543210";
-}
+  const a = area.value;
+  map.src = `https://www.google.com/maps?q=${a},Chennai&output=embed`;
 
-function whatsappShop(){
-  const msg=`Pre-Book Item: ${itemName.value}\nArea: ${area.value}`;
-  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
-}
+  const data = `Item:${item.value}, Area:${a}`;
+  qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
+};
+
+window.callShop = ()=>location.href="tel:+919876543210";
+window.whatsapp = ()=>{
+  const msg = `Pre-Booking: ${item.value} at ${area.value}`;
+  location.href = `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
+};
 </script>
 
 </body>
