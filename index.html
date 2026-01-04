@@ -20,7 +20,7 @@ body{
 .card{
   background:#fff;
   width:95%;
-  max-width:440px;
+  max-width:430px;
   border-radius:16px;
   padding:20px;
   box-shadow:0 15px 40px rgba(0,0,0,.3);
@@ -54,8 +54,8 @@ button{border:none;cursor:pointer}
 <!-- LOGIN -->
 <div id="login">
 <h2>🔐 Login / Signup</h2>
-<input placeholder="Email">
-<input type="password" placeholder="Password">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
 <button class="primary" onclick="login()">Continue</button>
 </div>
 
@@ -75,7 +75,7 @@ button{border:none;cursor:pointer}
 </select>
 
 <select id="item">
-<option>Select Item</option>
+<option value="">Select Item</option>
 </select>
 
 <select id="area">
@@ -115,94 +115,92 @@ Dairy:["Milk","Curd","Butter","Cheese"],
 Hardware:["Hammer","Screwdriver","Nails","Drill","Pipe"]
 };
 
-const shopsByArea={
-Velachery:[
-{name:"Sri Medicals",trust:4.6,phone:"9876543210",open:true},
-{name:"Green Grocery",trust:4.3,phone:"9876543211",open:true},
-{name:"City Pharmacy",trust:4.1,phone:"9876543212",open:false}
-],
-Tambaram:[
-{name:"Apollo Pharmacy",trust:4.7,phone:"9876543220",open:true},
-{name:"Daily Needs Store",trust:4.2,phone:"9876543221",open:true}
-],
-Anna Nagar:[
-{name:"Health Plus",trust:4.5,phone:"9876543230",open:true},
-{name:"Fresh Mart",trust:4.4,phone:"9876543231",open:true}
-]
-};
-
-/* ---------- AUTH ---------- */
+/* ---------- LOGIN ---------- */
 function login(){
-login.style.display="none";
-app.style.display="block";
+  if(!email.value || !password.value){
+    alert("Enter email & password");
+    return;
+  }
+  localStorage.setItem("user",email.value);
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
 }
-function logout(){location.reload();}
 
-/* ---------- LOAD ITEMS ---------- */
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+if(localStorage.getItem("user")){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+}
+
+/* ---------- ITEMS ---------- */
 function loadItems(){
-item.innerHTML="<option>Select Item</option>";
-(itemsData[category.value]||[]).forEach(i=>{
-item.innerHTML+=`<option>${i}</option>`;
-});
+  item.innerHTML="<option value=''>Select Item</option>";
+  (itemsData[category.value]||[]).forEach(i=>{
+    item.innerHTML+=`<option>${i}</option>`;
+  });
 }
 
 let booking={};
 
 /* ---------- SEARCH ---------- */
 function search(){
-booking={
-id:"BOOK"+Math.floor(Math.random()*100000),
-item:item.value,
-area:area.value
-};
+  if(!category.value || !item.value){
+    alert("Select category & item");
+    return;
+  }
 
-const shops=shopsByArea[area.value]||[];
+  booking={
+    id:"BOOK"+Date.now(),
+    item:item.value,
+    area:area.value
+  };
 
-if(shops.length===0){
-result.innerHTML="<p>No shops found in this area</p>";
-return;
-}
+  result.innerHTML=`
+  <div class="shop">
+    <b>Shop:</b> Local Verified Store<br>
+    <b>Item:</b> ${booking.item}<br>
+    <b>Area:</b> ${booking.area}<br><br>
 
-let html="";
-shops.forEach(s=>{
-html+=`
-<div class="shop">
-<b>${s.name}</b><br>
-⭐ Trust: ${s.trust}<br>
-Status: ${s.open?"🟢 Open":"🔴 Closed"}<br><br>
+    <button class="primary" onclick="preBook()">Pre-Book</button>
+    <button class="green" onclick="callShop()">📞 Call</button>
+    <button class="green" onclick="wa()">💬 WhatsApp</button>
+    <button class="green" onclick="openMap()">📍 Map</button>
 
-<button class="primary" onclick="preBook()">Pre-Book</button>
-<button class="green" onclick="callShop('${s.phone}')">📞 Call</button>
-<button class="green" onclick="waShop('${s.phone}')">💬 WhatsApp</button>
-<button class="green" onclick="map()">📍 Map</button>
-
-<div id="qr" class="center"></div>
-</div>`;
-});
-
-result.innerHTML=html;
+    <div id="qr" class="center"></div>
+  </div>`;
 }
 
 /* ---------- PRE BOOK ---------- */
 function preBook(){
-alert("Booking Confirmed: "+booking.id);
-qr.innerHTML="";
-new QRCode(qr,{text:JSON.stringify(booking),width:160,height:160});
+  alert("Booking Confirmed: "+booking.id);
+  const qrDiv=document.getElementById("qr");
+  qrDiv.innerHTML="";
+  new QRCode(qrDiv,{
+    text:JSON.stringify(booking),
+    width:160,
+    height:160
+  });
 }
 
 /* ---------- ACTIONS ---------- */
-function callShop(num){location.href="tel:+91"+num;}
-function waShop(num){
-window.open(`https://wa.me/91${num}?text=Booking ${booking.id} - ${booking.item}`);
+function callShop(){
+  location.href="tel:+919876543210";
 }
-function map(){
-window.open(`https://www.google.com/maps/search/${booking.area}+shop`);
+function wa(){
+  const msg=`Booking ${booking.id} - ${booking.item} (${booking.area})`;
+  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
+}
+function openMap(){
+  window.open(`https://www.google.com/maps/search/${booking.area}+shop`);
 }
 function nearMe(){
-alert("📍 Near Me detected: Velachery");
-area.value="Velachery";
+  area.value="Velachery";
+  alert("📍 Near Me detected: Velachery");
 }
 </script>
-
 </body>
 </html>
