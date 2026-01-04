@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quantum Item Finder</title>
 
-<!-- QR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  font-family:"Segoe UI",sans-serif;
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
   min-height:100vh;
   display:flex;
   justify-content:center;
@@ -20,13 +19,13 @@ body{
 }
 .card{
   background:#fff;
-  width:90%;
-  max-width:420px;
+  width:95%;
+  max-width:430px;
   border-radius:16px;
   padding:20px;
   box-shadow:0 15px 40px rgba(0,0,0,.3);
 }
-h2{text-align:center;margin-bottom:15px}
+h2{text-align:center}
 select,input,button{
   width:100%;
   padding:12px;
@@ -35,153 +34,133 @@ select,input,button{
   border:1px solid #ccc;
   font-size:15px;
 }
-button{
-  border:none;
-  cursor:pointer;
-}
+button{border:none;cursor:pointer}
 .primary{background:#3f6ae1;color:#fff}
 .green{background:#2e7d32;color:#fff}
-.red{background:#c62828;color:#fff}
 .gray{background:#eee}
-.hidden{display:none}
-.shop{
-  margin-top:15px;
-  padding:12px;
-  border-radius:12px;
-  background:#f7f7f7;
-}
+.shop{background:#f7f7f7;padding:12px;border-radius:12px;margin-top:15px}
 .center{text-align:center}
 </style>
 </head>
 
 <body>
-
-<div class="card" id="app">
+<div class="card">
 
 <!-- LOGIN -->
 <div id="login">
 <h2>🔐 Login / Signup</h2>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button class="primary" onclick="login()">Login / Signup</button>
+<input placeholder="Email">
+<input type="password" placeholder="Password">
+<button class="primary" onclick="login()">Continue</button>
 </div>
 
-<!-- SEARCH -->
-<div id="search" class="hidden">
+<!-- APP -->
+<div id="app" style="display:none">
 <h2>🔍 Item Search</h2>
 
-<select id="category">
+<select id="category" onchange="loadItems()">
+<option value="">Select Category</option>
 <option>Grocery</option>
-<option>Vegetables</option>
-<option>Fruits</option>
 <option>Medical</option>
-<option>Stationery</option>
 <option>Electronics</option>
+<option>Stationery</option>
 <option>Bakery</option>
 <option>Dairy</option>
+<option>Hardware</option>
 </select>
 
-<input id="item" placeholder="Item name (Rice / Tablet / Pen)">
+<select id="item">
+<option>Select Item</option>
+</select>
 
 <select id="area">
-<option>Velachery</option>
-<option>T Nagar</option>
-<option>Tambaram</option>
-<option>Anna Nagar</option>
-<option>Adyar</option>
-<option>Porur</option>
-<option>OMR</option>
-<option>Perungudi</option>
-<option>Chromepet</option>
-<option>Ambattur</option>
-<option>Poonamallee</option>
-<option>Avadi</option>
+<option>Velachery</option><option>Adyar</option><option>T Nagar</option>
+<option>Guindy</option><option>Anna Nagar</option><option>Tambaram</option>
+<option>Chromepet</option><option>Pallavaram</option><option>Medavakkam</option>
+<option>Sholinganallur</option><option>OMR</option><option>ECR</option>
+<option>Perungudi</option><option>Porur</option><option>Ambattur</option>
+<option>Avadi</option><option>Madipakkam</option><option>Nanganallur</option>
+<option>Triplicane</option><option>Mylapore</option><option>Royapettah</option>
+<option>Vadapalani</option><option>Kodambakkam</option>
+<option>Perambur</option><option>Kolathur</option>
+<option>Redhills</option><option>Poonamallee</option>
+<option>Thiruvallur</option><option>Sriperumbudur</option>
+<option>Oragadam</option><option>Guduvanchery</option>
+<option>Urapakkam</option><option>Vandalur</option>
+<option>Kelambakkam</option><option>Chengalpattu</option>
 </select>
 
+<button class="primary" onclick="nearMe()">📍 Near Me</button>
 <button class="primary" onclick="search()">Search</button>
 <button class="gray" onclick="logout()">Logout</button>
 
 <div id="result"></div>
 </div>
-
 </div>
 
 <script>
-let currentBooking=null;
+const itemsData={
+Grocery:["Rice","Wheat","Sugar","Salt","Oil","Dal","Flour","Spices","Biscuits"],
+Medical:["Paracetamol","Crocin","Vicks","ORS","Thermometer","Bandage","Dettol"],
+Electronics:["Mobile","Charger","Power Bank","Earphones","Extension Box"],
+Stationery:["Pen","Pencil","Notebook","Bag","Marker","Eraser"],
+Bakery:["Bread","Cake","Buns","Cookies"],
+Dairy:["Milk","Curd","Butter","Cheese"],
+Hardware:["Hammer","Screwdriver","Nails","Drill","Pipe"]
+};
 
 function login(){
-  localStorage.setItem("user","ok");
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("search").classList.remove("hidden");
+document.getElementById("login").style.display="none";
+document.getElementById("app").style.display="block";
 }
 
-function logout(){
-  localStorage.clear();
-  location.reload();
+function logout(){location.reload();}
+
+function loadItems(){
+item.innerHTML="<option>Select Item</option>";
+(itemsData[category.value]||[]).forEach(i=>{
+item.innerHTML+=`<option>${i}</option>`;
+});
 }
 
-if(localStorage.getItem("user")){
-  login();
-}
+let booking={};
 
 function search(){
-  const cat=category.value;
-  const itemName=item.value || "Item";
-  const areaName=area.value;
+booking={
+id:"BOOK"+Math.floor(Math.random()*100000),
+item:item.value,
+area:area.value
+};
 
-  const shop={
-    name:"Local Verified Store",
-    phone:"+919876543210",
-    map:`https://www.google.com/maps/search/${areaName}+shop`
-  };
-
-  currentBooking={
-    id:"BOOK-"+Math.floor(Math.random()*100000),
-    item:itemName,
-    area:areaName,
-    shop:shop.name
-  };
-
-  result.innerHTML=`
-  <div class="shop">
-    <b>Shop:</b> ${shop.name}<br>
-    <b>Category:</b> ${cat}<br>
-    <b>Item:</b> ${itemName}<br>
-    <b>Area:</b> ${areaName}<br><br>
-
-    <button class="primary" onclick="preBook()">Pre-Book</button>
-    <button class="green" onclick="callShop()">📞 Call</button>
-    <button class="green" onclick="whatsapp()">💬 WhatsApp</button>
-    <button class="green" onclick="openMap()">📍 Map</button>
-
-    <div id="qr" class="center"></div>
-  </div>
-  `;
+result.innerHTML=`
+<div class="shop">
+<b>Shop:</b> Local Verified Store<br>
+<b>Item:</b> ${booking.item}<br>
+<b>Area:</b> ${booking.area}<br><br>
+<button class="primary" onclick="preBook()">Pre-Book</button>
+<button class="green" onclick="callShop()">📞 Call</button>
+<button class="green" onclick="wa()">💬 WhatsApp</button>
+<button class="green" onclick="map()">📍 Map</button>
+<div id="qr" class="center"></div>
+</div>`;
 }
 
 function preBook(){
-  alert("Booking Confirmed\nID: "+currentBooking.id);
-  document.getElementById("qr").innerHTML="";
-  new QRCode("qr",{
-    text: JSON.stringify(currentBooking),
-    width:160,
-    height:160
-  });
+alert("Booking Confirmed: "+booking.id);
+qr.innerHTML="";
+new QRCode(qr,{text:JSON.stringify(booking),width:160,height:160});
 }
-
-function callShop(){
-  window.location.href="tel:+919876543210";
+function callShop(){location.href="tel:+919876543210";}
+function wa(){
+window.open(`https://wa.me/919876543210?text=Booking ${booking.id} - ${booking.item}`);
 }
-
-function whatsapp(){
-  const msg=`Booking ID: ${currentBooking.id}%0AItem: ${currentBooking.item}%0AArea: ${currentBooking.area}`;
-  window.open(`https://wa.me/919876543210?text=${msg}`);
+function map(){
+window.open(`https://www.google.com/maps/search/${booking.area}+shop`);
 }
-
-function openMap(){
-  window.open(`https://www.google.com/maps/search/${currentBooking.area}+shop`);
+function nearMe(){
+alert("📍 Near Me detected: Velachery");
+area.value="Velachery";
 }
 </script>
-
 </body>
 </html>
