@@ -2,44 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Quantum Item Finder</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 body{
-  margin:0;
-  font-family:"Segoe UI",sans-serif;
+  margin:0;font-family:system-ui,Segoe UI;
   background:linear-gradient(135deg,#1e3c72,#2a5298);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  min-height:100vh;display:flex;justify-content:center;align-items:center;
 }
 .card{
-  background:#fff;
-  width:95%;
-  max-width:430px;
-  border-radius:18px;
-  padding:20px;
-  box-shadow:0 15px 40px rgba(0,0,0,.3);
+  background:#fff;width:95%;max-width:430px;border-radius:18px;
+  padding:20px;box-shadow:0 15px 40px rgba(0,0,0,.3);
 }
-h2{text-align:center;margin-bottom:10px}
-select,input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:15px;
+h2{text-align:center;margin:6px 0}
+input,select,button{
+  width:100%;padding:12px;margin-top:10px;border-radius:12px;
+  border:1px solid #ccc;font-size:15px;
 }
 button{border:none;cursor:pointer}
 .primary{background:#3f6ae1;color:#fff}
 .green{background:#2e7d32;color:#fff}
 .gray{background:#eee}
-.shop{background:#f7f7f7;padding:12px;border-radius:12px;margin-top:15px}
+.shop{background:#f7f7f7;padding:14px;border-radius:14px;margin-top:15px}
 .center{text-align:center}
+.hide{display:none}
 .small{font-size:13px;color:#555;text-align:center}
 </style>
 </head>
@@ -49,111 +38,106 @@ button{border:none;cursor:pointer}
 
 <!-- LOGIN -->
 <div id="login">
-<h2>🔐 Login / Signup</h2>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button class="primary" onclick="login()">Continue</button>
-<p class="small">Demo login – any email/password</p>
+  <h2>🔐 Login / Signup</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="primary" id="loginBtn">Continue</button>
+  <p class="small">Demo login – any email/password</p>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none">
-<h2>🔍 Item Search</h2>
+<div id="app" class="hide">
+  <h2>🔍 Item Search</h2>
 
-<select id="category">
-<option value="">Select Category</option>
-<option>Grocery</option>
-<option>Vegetables</option>
-<option>Fruits</option>
-<option>Medical</option>
-<option>Stationery</option>
-<option>Electronics</option>
-<option>Bakery</option>
-<option>Dairy</option>
-<option>Hardware</option>
-</select>
+  <select id="category">
+    <option value="">Select Category</option>
+    <option>Grocery</option><option>Vegetables</option><option>Fruits</option>
+    <option>Medical</option><option>Stationery</option><option>Electronics</option>
+    <option>Bakery</option><option>Dairy</option><option>Hardware</option>
+  </select>
 
-<input id="item" placeholder="Item name (Rice / Pen / Tablet)">
+  <input id="item" placeholder="Item name (Rice / Pen / Tablet)">
 
-<select id="itemList">
-<option value="">Select Item from List</option>
-</select>
+  <!-- CATEGORY → ITEM LIST -->
+  <select id="itemList">
+    <option value="">Select Item from List</option>
+  </select>
 
-<select id="area">
-<option value="">Select Area</option>
-<option>Velachery</option><option>Adyar</option><option>T Nagar</option>
-<option>Guindy</option><option>Anna Nagar</option><option>Tambaram</option>
-<option>Chromepet</option><option>Pallavaram</option>
-<option>Medavakkam</option><option>Sholinganallur</option>
-<option>OMR</option><option>ECR</option>
-<option>Porur</option><option>Ambattur</option>
-<option>Avadi</option><option>Vandalur</option>
-<option>Guduvanchery</option><option>Urapakkam</option>
-<option>Kelambakkam</option><option>Chengalpattu</option>
-</select>
+  <select id="area">
+    <option value="">Select Area</option>
+    <option>Velachery</option><option>Adyar</option><option>T Nagar</option>
+    <option>Guindy</option><option>Anna Nagar</option><option>Tambaram</option>
+    <option>Chromepet</option><option>Pallavaram</option><option>Medavakkam</option>
+    <option>Sholinganallur</option><option>OMR</option><option>ECR</option>
+    <option>Porur</option><option>Ambattur</option><option>Avadi</option>
+    <option>Vandalur</option><option>Guduvanchery</option><option>Urapakkam</option>
+    <option>Kelambakkam</option><option>Chengalpattu</option>
+  </select>
 
-<button class="primary" onclick="nearMe()">📍 Near Me</button>
-<button class="primary" onclick="search()">Search</button>
-<button class="gray" onclick="logout()">Logout</button>
+  <button class="primary" onclick="nearMe()">📍 Near Me</button>
+  <button class="primary" onclick="search()">Search</button>
+  <button class="gray" onclick="logout()">Logout</button>
 
-<div id="result"></div>
+  <div id="result"></div>
 </div>
 </div>
 
 <script>
-/* ---------------- DATA ---------------- */
-const itemsData={
-Grocery:["Rice","Wheat","Sugar","Salt","Oil","Dal","Biscuits"],
-Vegetables:["Tomato","Onion","Potato","Carrot","Beans"],
-Fruits:["Apple","Banana","Orange","Mango"],
-Medical:["Paracetamol","Crocin","Vicks","ORS"],
-Stationery:["Pen","Pencil","Notebook","Bag"],
-Electronics:["Mobile","Charger","Earphones"],
-Bakery:["Bread","Cake","Buns"],
-Dairy:["Milk","Curd","Butter","Cheese"],
-Hardware:["Hammer","Screwdriver","Nails","Drill"]
+/* ---------- DATA ---------- */
+const itemsByCategory={
+  Grocery:["Rice","Wheat","Sugar","Oil","Dal","Salt","Biscuits"],
+  Vegetables:["Tomato","Onion","Potato","Carrot","Beans"],
+  Fruits:["Apple","Banana","Orange","Mango"],
+  Medical:["Paracetamol","Crocin","Vicks","ORS"],
+  Stationery:["Pen","Pencil","Notebook","Bag"],
+  Electronics:["Mobile","Charger","Earphones"],
+  Bakery:["Bread","Cake","Buns"],
+  Dairy:["Milk","Curd","Butter","Cheese"],
+  Hardware:["Hammer","Screwdriver","Nails","Drill"]
 };
 
-/* ---------------- LOGIN ---------------- */
-function login(){
-  if(!email.value || !pass.value){
-    alert("Enter email & password");
-    return;
+/* ---------- LOGIN (SAFE) ---------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  if(localStorage.getItem("user")){
+    login.style.display="none"; app.classList.remove("hide");
   }
-  document.getElementById("login").style.display="none";
-  document.getElementById("app").style.display="block";
-}
-function logout(){location.reload();}
+  loginBtn.onclick=()=>{
+    if(!email.value||!password.value){alert("Enter email & password");return;}
+    localStorage.setItem("user",email.value);
+    login.style.display="none"; app.classList.remove("hide");
+  };
+});
+function logout(){localStorage.clear();location.reload();}
 
-/* ---------------- CATEGORY → ITEM LIST ---------------- */
+/* ---------- CATEGORY → ITEM LIST ---------- */
 category.onchange=()=>{
   itemList.innerHTML='<option value="">Select Item from List</option>';
-  (itemsData[category.value]||[]).forEach(i=>{
+  (itemsByCategory[category.value]||[]).forEach(i=>{
     itemList.innerHTML+=`<option>${i}</option>`;
   });
 };
 itemList.onchange=()=>{ item.value=itemList.value; };
 
-/* ---------------- NEAR ME ---------------- */
+/* ---------- NEAR ME ---------- */
 function nearMe(){
   area.value="Velachery";
   alert("📍 Location detected: Velachery");
 }
 
-/* ---------------- SEARCH & BOOK ---------------- */
+/* ---------- SEARCH & PAYMENT ---------- */
 let booking={};
 
 function search(){
-  if(!category.value || !item.value || !area.value){
-    alert("Select category, item & area");
-    return;
+  if(!category.value||!item.value||!area.value){
+    alert("Select category, item & area"); return;
   }
-
   booking={
     id:"BOOK"+Math.floor(Math.random()*100000),
     category:category.value,
     item:item.value,
-    area:area.value
+    area:area.value,
+    paymentMethod:"",
+    paymentStatus:""
   };
 
   result.innerHTML=`
@@ -161,30 +145,59 @@ function search(){
     <b>Shop:</b> Local Verified Store<br>
     <b>Category:</b> ${booking.category}<br>
     <b>Item:</b> ${booking.item}<br>
-    <b>Area:</b> ${booking.area}<br><br>
+    <b>Area:</b> ${booking.area}<br>
+    <b>Trust:</b> ⭐⭐⭐⭐☆<br><br>
 
-    <button class="primary" onclick="preBook()">Pre-Book</button>
-    <button class="green" onclick="callShop()">📞 Call</button>
-    <button class="green" onclick="wa()">💬 WhatsApp</button>
-    <button class="green" onclick="map()">📍 Map</button>
+    <b>Select Payment</b>
+    <select id="payMethod">
+      <option value="">Choose</option>
+      <option value="COD">Cash on Delivery</option>
+      <option value="ONLINE">Online Payment (UPI / Card)</option>
+    </select>
 
-    <div id="qr" class="center"></div>
+    <button class="primary" onclick="confirmPayment()">Confirm Payment</button>
+
+    <div id="payInfo" class="small"></div>
+    <div id="actions" class="hide">
+      <button class="green" onclick="callShop()">📞 Call</button>
+      <button class="green" onclick="wa()">💬 WhatsApp</button>
+      <button class="green" onclick="map()">📍 Map</button>
+      <div id="qr" class="center"></div>
+    </div>
   </div>`;
 }
 
-function preBook(){
-  alert("✅ Booking Confirmed: "+booking.id);
-  qr.innerHTML="";
-  new QRCode(qr,{
-    text:JSON.stringify(booking),
-    width:160,height:160
-  });
+function confirmPayment(){
+  const pm=document.getElementById("payMethod").value;
+  if(!pm){alert("Select payment method");return;}
+
+  if(pm==="COD"){
+    booking.paymentMethod="Cash on Delivery";
+    booking.paymentStatus="Pending";
+    document.getElementById("payInfo").innerText="Payment: Cash on Delivery (Pay at door)";
+  }else{
+    booking.paymentMethod="Online";
+    booking.paymentStatus="Paid";
+    booking.txn="TXN"+Math.floor(Math.random()*1000000);
+    document.getElementById("payInfo").innerText=
+      `Payment: Online ✓ (Txn ${booking.txn})`;
+  }
+
+  document.getElementById("actions").classList.remove("hide");
+  const qrDiv=document.getElementById("qr");
+  qrDiv.innerHTML="";
+  new QRCode(qrDiv,{text:JSON.stringify(booking),width:160,height:160});
+  alert("Booking Confirmed: "+booking.id);
 }
 
-/* ---------------- ACTIONS ---------------- */
+/* ---------- ACTIONS ---------- */
 function callShop(){location.href="tel:+919876543210";}
 function wa(){
-  window.open(`https://wa.me/919876543210?text=Booking ${booking.id} - ${booking.item}`);
+  const msg=`Booking ${booking.id}
+Item: ${booking.item}
+Area: ${booking.area}
+Payment: ${booking.paymentMethod}`;
+  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
 }
 function map(){
   window.open(`https://www.google.com/maps/search/${booking.area}+shop`);
