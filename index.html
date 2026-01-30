@@ -5,224 +5,257 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Quantum Item Finder</title>
 
+<!-- QR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+<!-- ICONS -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-/* ===== BASE ===== */
+*{box-sizing:border-box}
 body{
-  margin:0;font-family:"Segoe UI",system-ui;
-  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  margin:0;font-family:Poppins,system-ui;
+  background:#f4f5f7;
+}
+.hide{display:none}
+
+/* ===== LOGIN ===== */
+.login{
   min-height:100vh;display:flex;justify-content:center;align-items:center;
-  transition:.3s;
+  background:linear-gradient(135deg,#ff7043,#ff5252);
 }
-.card{
-  background:#fff;width:95%;max-width:430px;border-radius:18px;
-  padding:20px;box-shadow:0 15px 40px rgba(0,0,0,.3);
+.login-card{
+  background:#fff;width:90%;max-width:380px;
+  padding:22px;border-radius:18px;
 }
-h2{text-align:center;margin:6px 0}
+.login-card h2{text-align:center}
 input,select,button{
-  width:100%;padding:12px;margin-top:10px;border-radius:12px;
-  border:1px solid #ccc;font-size:15px;
+  width:100%;padding:12px;margin-top:10px;
+  border-radius:12px;border:1px solid #ccc;font-size:15px;
 }
 button{border:none;cursor:pointer}
-.primary{background:#3f6ae1;color:#fff}
-.green{background:#2e7d32;color:#fff}
+.primary{background:#ff5722;color:#fff}
+.green{background:#2e7d32;color:#fff;margin-top:8px}
 .gray{background:#eee}
-.shop{background:#f7f7f7;padding:14px;border-radius:14px;margin-top:15px}
-.center{text-align:center}
-.hide{display:none}
-.small{font-size:13px;color:#555;text-align:center}
+
+/* ===== HEADER ===== */
+.header{
+  background:#ff5722;color:#fff;
+  padding:14px 14px 20px;
+  border-radius:0 0 22px 22px;
+}
+.search{
+  background:#fff;border-radius:14px;
+  display:flex;align-items:center;padding:8px;
+}
+.search input{
+  border:none;outline:none;margin:0
+}
+.search span{font-size:18px;padding:0 8px}
+
+/* ===== BANNER ===== */
+.banner{
+  margin:14px;background:linear-gradient(135deg,#ff9800,#ff5722);
+  color:#fff;padding:16px;border-radius:18px;
+}
+.banner b{font-size:18px}
+
+/* ===== CATEGORY GRID ===== */
+.grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;padding:14px;
+}
+.cat{
+  background:#fff;border-radius:16px;
+  text-align:center;padding:10px;
+  box-shadow:0 5px 12px rgba(0,0,0,.1);
+}
+.cat img{
+  width:70px;height:70px;object-fit:contain;
+}
+.cat p{margin:6px 0;font-weight:600}
+
+/* ===== RESULT ===== */
+.result{
+  background:#fff;border-radius:18px;
+  padding:16px;margin:14px;
+}
+.badge{font-size:13px;color:#388e3c}
+
+/* ===== BOTTOM NAV ===== */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid #ddd;
+  display:flex;justify-content:space-around;padding:8px 0;
+}
+.nav div{text-align:center;font-size:13px}
+.nav div span{display:block;font-size:18px}
 
 /* ===== DARK MODE ===== */
-body.dark{
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-}
-body.dark .card{background:#121212;color:#f1f1f1}
-body.dark input,body.dark select{
-  background:#1e1e1e;color:#fff;border:1px solid #444
-}
-body.dark .shop{background:#1c1c1c}
-body.dark .gray{background:#333;color:#fff}
-body.dark .primary{background:#6c8cff}
-body.dark .green{background:#3aa76d}
+body.dark{background:#121212;color:#eee}
+body.dark .login-card,
+body.dark .cat,
+body.dark .result,
+body.dark .search,
+body.dark .nav{background:#1e1e1e;color:#fff}
 </style>
 </head>
 
 <body>
-<div class="card">
 
 <!-- LOGIN -->
-<div id="login">
-  <h2>🔐 Login / Signup</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button class="primary" id="loginBtn">Continue</button>
-  <p class="small">Demo login – any email/password</p>
+<div class="login" id="login">
+  <div class="login-card">
+    <h2>🔐 Login / Signup</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button class="primary" id="loginBtn">Continue</button>
+    <p style="font-size:13px;text-align:center">Demo login – any email/password</p>
+  </div>
 </div>
 
 <!-- APP -->
 <div id="app" class="hide">
-  <h2>🔍 Item Search</h2>
 
-  <button class="gray" onclick="toggleTheme()">🌙 Dark Mode</button>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="search">
+      <span>🔍</span>
+      <input id="item" placeholder="Search items or shops">
+    </div>
+  </div>
 
-  <select id="category">
-    <option value="">Select Category</option>
-    <option>Grocery</option><option>Vegetables</option><option>Fruits</option>
-    <option>Medical</option><option>Stationery</option><option>Electronics</option>
-    <option>Bakery</option><option>Dairy</option><option>Hardware</option>
-  </select>
+  <!-- BANNER -->
+  <div class="banner">
+    <b>FLAT 40% OFF</b><br>
+    On first booking near you 🎉
+  </div>
 
-  <input id="item" placeholder="Item name (Rice / Pen / Tablet)">
+  <!-- CATEGORY -->
+  <div class="grid">
+    <div class="cat" onclick="setItem('Rice')">
+      <img src="https://i.imgur.com/eTmWoAN.png"><p>Grocery</p>
+    </div>
+    <div class="cat" onclick="setItem('Paracetamol')">
+      <img src="https://i.imgur.com/4M34hi2.png"><p>Medical</p>
+    </div>
+    <div class="cat" onclick="setItem('Pen')">
+      <img src="https://i.imgur.com/8pQeZ6D.png"><p>Stationery</p>
+    </div>
+    <div class="cat" onclick="setItem('Mobile Charger')">
+      <img src="https://i.imgur.com/UjFQv9k.png"><p>Electronics</p>
+    </div>
+    <div class="cat" onclick="setItem('Bread')">
+      <img src="https://i.imgur.com/6rlF5jP.png"><p>Bakery</p>
+    </div>
+    <div class="cat" onclick="setItem('Milk')">
+      <img src="https://i.imgur.com/Q6aZJ9K.png"><p>Dairy</p>
+    </div>
+  </div>
 
-  <select id="itemList">
-    <option value="">Select Item from List</option>
-  </select>
+  <!-- SEARCH CONTROLS -->
+  <div style="padding:14px">
+    <select id="area">
+      <option value="">Select Area</option>
+      <option>Velachery</option><option>Adyar</option><option>T Nagar</option>
+      <option>Guindy</option><option>Anna Nagar</option><option>Tambaram</option>
+      <option>Chromepet</option><option>Pallavaram</option>
+    </select>
 
-  <select id="area">
-    <option value="">Select Area</option>
-    <option>Velachery</option><option>Adyar</option><option>T Nagar</option>
-    <option>Guindy</option><option>Anna Nagar</option><option>Tambaram</option>
-    <option>Chromepet</option><option>Pallavaram</option><option>Medavakkam</option>
-    <option>Sholinganallur</option><option>OMR</option><option>ECR</option>
-    <option>Porur</option><option>Ambattur</option><option>Avadi</option>
-    <option>Vandalur</option><option>Guduvanchery</option><option>Urapakkam</option>
-    <option>Kelambakkam</option><option>Chengalpattu</option>
-  </select>
-
-  <button class="primary" onclick="nearMe()">📍 Near Me</button>
-  <button class="primary" onclick="search()">Search</button>
-  <button class="gray" onclick="logout()">Logout</button>
+    <button class="primary" onclick="nearMe()">📍 Near Me</button>
+    <button class="primary" onclick="search()">Search</button>
+    <button class="gray" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </div>
 
   <div id="result"></div>
-</div>
+
+  <!-- BOTTOM NAV -->
+  <div class="nav">
+    <div onclick="scrollTo(0,0)"><span>🏠</span>Home</div>
+    <div onclick="alert('Cart demo')"><span>🛒</span>Cart</div>
+    <div onclick="alert('Bookings demo')"><span>📦</span>Orders</div>
+    <div onclick="logout()"><span>👤</span>Profile</div>
+  </div>
 </div>
 
 <script>
-/* ===== DATA ===== */
-const itemsByCategory={
-  Grocery:["Rice","Wheat","Sugar","Oil","Dal","Salt","Biscuits"],
-  Vegetables:["Tomato","Onion","Potato","Carrot","Beans"],
-  Fruits:["Apple","Banana","Orange","Mango"],
-  Medical:["Paracetamol","Crocin","Vicks","ORS"],
-  Stationery:["Pen","Pencil","Notebook","Bag"],
-  Electronics:["Mobile","Charger","Earphones"],
-  Bakery:["Bread","Cake","Buns"],
-  Dairy:["Milk","Curd","Butter","Cheese"],
-  Hardware:["Hammer","Screwdriver","Nails","Drill"]
+let booking={};
+
+/* LOGIN */
+loginBtn.onclick=()=>{
+  if(!email.value||!password.value)return alert("Enter details");
+  localStorage.setItem("user",email.value);
+  login.style.display="none";
+  app.classList.remove("hide");
 };
-
-/* ===== LOGIN ===== */
-document.addEventListener("DOMContentLoaded",()=>{
-  if(localStorage.getItem("user")){
-    login.style.display="none"; app.classList.remove("hide");
-  }
-  loginBtn.onclick=()=>{
-    if(!email.value||!password.value){alert("Enter email & password");return;}
-    localStorage.setItem("user",email.value);
-    login.style.display="none"; app.classList.remove("hide");
-  };
-
-  // load theme
-  if(localStorage.getItem("theme")==="dark"){
-    document.body.classList.add("dark");
-  }
-});
-function logout(){localStorage.clear();location.reload();}
-
-/* ===== CATEGORY → ITEM LIST ===== */
-category.onchange=()=>{
-  itemList.innerHTML='<option value="">Select Item from List</option>';
-  (itemsByCategory[category.value]||[]).forEach(i=>{
-    itemList.innerHTML+=`<option>${i}</option>`;
-  });
-};
-itemList.onchange=()=>{ item.value=itemList.value; };
-
-/* ===== DARK MODE ===== */
-function toggleTheme(){
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme",
-    document.body.classList.contains("dark")?"dark":"light"
-  );
+if(localStorage.getItem("user")){
+  login.style.display="none";app.classList.remove("hide");
 }
 
-/* ===== NEAR ME ===== */
+/* CATEGORY */
+function setItem(v){ item.value=v }
+
+/* NEAR ME */
 function nearMe(){
   area.value="Velachery";
   alert("📍 Location detected: Velachery");
 }
 
-/* ===== SEARCH + PAYMENT ===== */
-let booking={};
+/* SEARCH */
 function search(){
-  if(!category.value||!item.value||!area.value){
-    alert("Select category, item & area"); return;
-  }
+  if(!item.value||!area.value)return alert("Enter item & area");
+
   booking={
     id:"BOOK"+Math.floor(Math.random()*100000),
-    category:category.value,item:item.value,area:area.value,
-    paymentMethod:"",paymentStatus:""
+    item:item.value,
+    area:area.value
   };
 
   result.innerHTML=`
-  <div class="shop">
-    <b>Shop:</b> Local Verified Store<br>
-    <b>Category:</b> ${booking.category}<br>
-    <b>Item:</b> ${booking.item}<br>
-    <b>Area:</b> ${booking.area}<br>
-    <b>Trust:</b> ⭐⭐⭐⭐☆<br><br>
+  <div class="result">
+    <b>${booking.item}</b><br>
+    Area: ${booking.area}<br>
+    <span class="badge">✔ Verified Shop • ⭐ 4.3</span><br><br>
 
-    <b>Select Payment</b>
-    <select id="payMethod">
-      <option value="">Choose</option>
-      <option value="COD">Cash on Delivery</option>
-      <option value="ONLINE">Online Payment (UPI / Card)</option>
+    <select id="pay">
+      <option value="">Select Payment</option>
+      <option>Cash on Delivery</option>
+      <option>Online Payment</option>
     </select>
 
-    <button class="primary" onclick="confirmPayment()">Confirm Payment</button>
+    <button class="primary" onclick="pay()">Confirm Booking</button>
 
-    <div id="payInfo" class="small"></div>
-    <div id="actions" class="hide">
-      <button class="green" onclick="callShop()">📞 Call</button>
-      <button class="green" onclick="wa()">💬 WhatsApp</button>
-      <button class="green" onclick="map()">📍 Map</button>
-      <div id="qr" class="center"></div>
-    </div>
+    <div id="qr" style="margin-top:10px"></div>
+
+    <button class="green" onclick="callShop()">📞 Call</button>
+    <button class="green" onclick="wa()">💬 WhatsApp</button>
+    <button class="green" onclick="map()">📍 Map</button>
   </div>`;
 }
 
-function confirmPayment(){
-  const pm=document.getElementById("payMethod").value;
-  if(!pm){alert("Select payment method");return;}
-  if(pm==="COD"){
-    booking.paymentMethod="Cash on Delivery";
-    booking.paymentStatus="Pending";
-    payInfo.innerText="Payment: Cash on Delivery (Pay at door)";
-  }else{
-    booking.paymentMethod="Online";
-    booking.paymentStatus="Paid";
-    booking.txn="TXN"+Math.floor(Math.random()*1000000);
-    payInfo.innerText=`Payment: Online ✓ (Txn ${booking.txn})`;
-  }
-  actions.classList.remove("hide");
-  qr.innerHTML="";
-  new QRCode(qr,{text:JSON.stringify(booking),width:160,height:160});
+/* PAYMENT */
+function pay(){
+  new QRCode(qr,{
+    text:JSON.stringify(booking),
+    width:140,height:140
+  });
   alert("Booking Confirmed: "+booking.id);
 }
 
-/* ===== ACTIONS ===== */
+/* ACTIONS */
 function callShop(){location.href="tel:+919876543210";}
 function wa(){
-  const msg=`Booking ${booking.id}
-Item: ${booking.item}
-Area: ${booking.area}
-Payment: ${booking.paymentMethod}`;
-  window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`);
+  window.open(`https://wa.me/919876543210?text=Booking ${booking.id} - ${booking.item}`);
 }
 function map(){
   window.open(`https://www.google.com/maps/search/${booking.area}+shop`);
 }
+
+/* DARK */
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+}
+function logout(){localStorage.clear();location.reload();}
 </script>
 </body>
 </html>
